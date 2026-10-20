@@ -1,19 +1,27 @@
 {
   "validUser": {
-    "username": "thaihd_admin",
-    "password": "Password@123",
+    "username": "admin@example.com",
+    "password": "Password1",
     "role": "Admin",
-    "displayName": "Thái Hoàng Đình"
+    "displayName": "Admin User"
   },
-  "invalidUser": {
-    "username": "invalid_user",
-    "password": "WrongPassword@123",
-    "expectedError": "Tài khoản hoặc mật khẩu không chính xác"
+  "invalidPasswordUser": {
+    "username": "admin@example.com",
+    "password": "Password 1",
+    "expectedError": "Email hoặc mật khẩu không đúng."
   },
-  "lockedUser": {
-    "username": "locked_user",
-    "password": "Password@123",
-    "expectedError": "Tài khoản của bạn đã bị khóa"
+  "nonExistentUser": {
+    "username": "user_khong_ton_tai@example.com",
+    "password": "Password1",
+    "expectedError": "Email hoặc mật khẩu không đúng."
+  },
+  "caseSensitiveUser": {
+    "username": "admin@example.com",
+    "password": "password1",
+    "expectedError": "Email hoặc mật khẩu không đúng."
+  },
+  "emptyValidation": {
+    "emailError": "Vui lòng nhập email.",
+    "passwordError": "Vui lòng nhập mật khẩu."
   }
 }
-
