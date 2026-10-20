@@ -12,7 +12,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
   // ==========================================
   // KHỐI 01: BỐ CỤC & HIỂN THỊ
   // ==========================================
-  test('TC_AUTH_001: Hiển thị đầy đủ các thành phần màn hình đăng nhập', async ({ loginPage }) => {
+  test('TC_AUTH_001: Hiển thị đầy đủ các thành phần màn hình đăng nhập', {
+    tag: ['@normal', '@minor']
+  }, async ({ loginPage }) => {
     Logger.step(1, 'Kiểm tra hiển thị tiêu đề, mô tả và các trường nhập liệu');
     await expect(loginPage.heading).toBeVisible();
     await expect(loginPage.subtitle).toBeVisible();
@@ -27,7 +29,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
   // ==========================================
   // KHỐI 02: LUỒNG ĐĂNG NHẬP CHÍNH (AUTHENTICATION)
   // ==========================================
-  test('TC_AUTH_002: Đăng nhập thành công với tài khoản quản trị viên', async ({ loginPage, dashboardPage, page }) => {
+  test('TC_AUTH_002: Đăng nhập thành công với tài khoản quản trị viên', {
+    tag: ['@high', '@critical']
+  }, async ({ loginPage, dashboardPage, page }) => {
     Logger.step(1, 'Nhập Email quản trị viên');
     await loginPage.enterEmail(users.validUser.username);
 
@@ -43,7 +47,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
     await expect(dashboardPage.userNameBadge).toBeVisible();
   });
 
-  test('TC_AUTH_003: Đăng nhập thành công khi nhấn phím Enter trên bàn phím', async ({ loginPage, dashboardPage, page }) => {
+  test('TC_AUTH_003: Đăng nhập thành công khi nhấn phím Enter trên bàn phím', {
+    tag: ['@normal', '@major']
+  }, async ({ loginPage, dashboardPage, page }) => {
     Logger.step(1, 'Nhập Email hợp lệ');
     await loginPage.enterEmail(users.validUser.username);
 
@@ -58,7 +64,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
     await expect(dashboardPage.pageHeader).toBeVisible();
   });
 
-  test('TC_AUTH_004: Đăng nhập thất bại khi nhập sai mật khẩu', async ({ loginPage }) => {
+  test('TC_AUTH_004: Đăng nhập thất bại khi nhập sai mật khẩu', {
+    tag: ['@high', '@critical']
+  }, async ({ loginPage }) => {
     Logger.step(1, 'Nhập Email hợp lệ nhưng mật khẩu sai');
     await loginPage.enterEmail(users.invalidPasswordUser.username);
     await loginPage.enterPassword(users.invalidPasswordUser.password);
@@ -70,7 +78,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
     await expect(loginPage.globalErrorMessage).toBeVisible({ timeout: 10000 });
   });
 
-  test('TC_AUTH_005: Đăng nhập thất bại khi Email không tồn tại', async ({ loginPage }) => {
+  test('TC_AUTH_005: Đăng nhập thất bại khi Email không tồn tại', {
+    tag: ['@high', '@major']
+  }, async ({ loginPage }) => {
     Logger.step(1, 'Nhập Email không tồn tại trong hệ thống');
     await loginPage.enterEmail(users.nonExistentUser.username);
     await loginPage.enterPassword(users.nonExistentUser.password);
@@ -86,7 +96,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
   // ==========================================
   // KHỐI 03: KIỂM TRA TRƯỜNG EMAIL
   // ==========================================
-  test('TC_AUTH_006: Bỏ trống trường Email', async ({ loginPage }) => {
+  test('TC_AUTH_006: Bỏ trống trường Email', {
+    tag: ['@high', '@major']
+  }, async ({ loginPage }) => {
     Logger.step(1, 'Chỉ nhập mật khẩu và để trống Email');
     await loginPage.enterPassword(users.validUser.password);
 
@@ -97,7 +109,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
     await expect(loginPage.emailErrorMessage).toBeVisible();
   });
 
-  test('TC_AUTH_007: Nhập sai định dạng Email', async ({ loginPage }) => {
+  test('TC_AUTH_007: Nhập sai định dạng Email', {
+    tag: ['@normal', '@minor']
+  }, async ({ loginPage }) => {
     Logger.step(1, 'Nhập email không đúng định dạng');
     await loginPage.enterEmail('email_sai_dinh_dang');
     await loginPage.enterPassword(users.validUser.password);
@@ -115,7 +129,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
   // ==========================================
   // KHỐI 04: KIỂM TRA TRƯỜNG MẬT KHẨU
   // ==========================================
-  test('TC_AUTH_008: Bỏ trống trường Mật khẩu', async ({ loginPage }) => {
+  test('TC_AUTH_008: Bỏ trống trường Mật khẩu', {
+    tag: ['@high', '@major']
+  }, async ({ loginPage }) => {
     Logger.step(1, 'Chỉ nhập Email và để trống Mật khẩu');
     await loginPage.enterEmail(users.validUser.username);
 
@@ -126,7 +142,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
     await expect(loginPage.passwordErrorMessage).toBeVisible();
   });
 
-  test('TC_AUTH_009: Bỏ trống cả hai trường Email và Mật khẩu', async ({ loginPage }) => {
+  test('TC_AUTH_009: Bỏ trống cả hai trường Email và Mật khẩu', {
+    tag: ['@high', '@major']
+  }, async ({ loginPage }) => {
     Logger.step(1, 'Không nhập cả hai trường và nhấn nút "Đăng nhập"');
     await loginPage.clickLoginButton();
 
@@ -135,7 +153,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
     await expect(loginPage.passwordErrorMessage).toBeVisible();
   });
 
-  test('TC_AUTH_010: Phân biệt chữ hoa và chữ thường của mật khẩu', async ({ loginPage }) => {
+  test('TC_AUTH_010: Phân biệt chữ hoa và chữ thường của mật khẩu', {
+    tag: ['@normal', '@major']
+  }, async ({ loginPage }) => {
     Logger.step(1, 'Nhập mật khẩu bằng chữ thường (password1)');
     await loginPage.enterEmail(users.caseSensitiveUser.username);
     await loginPage.enterPassword(users.caseSensitiveUser.password);
@@ -150,7 +170,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
   // ==========================================
   // KHỐI 05: TÍNH NĂNG PHỤ TRỢ & BẢO MẬT
   // ==========================================
-  test('TC_AUTH_011: Mặc định ẩn mật khẩu dưới dạng dấu chấm', async ({ loginPage }) => {
+  test('TC_AUTH_011: Mặc định ẩn mật khẩu dưới dạng dấu chấm', {
+    tag: ['@high', '@major']
+  }, async ({ loginPage }) => {
     Logger.step(1, 'Nhập mật khẩu');
     await loginPage.enterPassword('Password1');
 
@@ -158,7 +180,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
     await expect(loginPage.passwordInput).toHaveAttribute('type', 'password');
   });
 
-  test('TC_AUTH_012: Nhấn biểu tượng hiển thị mật khẩu', async ({ loginPage }) => {
+  test('TC_AUTH_012: Nhấn biểu tượng hiển thị mật khẩu', {
+    tag: ['@normal', '@minor']
+  }, async ({ loginPage }) => {
     Logger.step(1, 'Nhập mật khẩu');
     await loginPage.enterPassword('Password1');
 
@@ -173,7 +197,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
     await expect(loginPage.passwordInput).toHaveAttribute('type', 'password');
   });
 
-  test('TC_AUTH_013: Tích chọn ô "Ghi nhớ đăng nhập"', async ({ loginPage }) => {
+  test('TC_AUTH_013: Tích chọn ô "Ghi nhớ đăng nhập"', {
+    tag: ['@low', '@minor']
+  }, async ({ loginPage }) => {
     Logger.step(1, 'Tích chọn ô Ghi nhớ đăng nhập');
     await loginPage.checkRememberMe();
 
@@ -187,7 +213,9 @@ test.describe('Module Đăng nhập - Hệ thống VNTEST LIMS', () => {
     await expect(loginPage.rememberCheckbox).not.toBeChecked();
   });
 
-  test('TC_AUTH_014: Điều hướng trực tiếp khi chưa đăng nhập (Auth Guard)', async ({ page }) => {
+  test('TC_AUTH_014: Điều hướng trực tiếp khi chưa đăng nhập (Auth Guard)', {
+    tag: ['@high', '@critical']
+  }, async ({ page }) => {
     Logger.step(1, 'Cố tình truy cập trang chủ / khi chưa đăng nhập');
     await page.goto('https://vntest-lims.pirago.work/');
 

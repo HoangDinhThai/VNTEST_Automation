@@ -1,11 +1,13 @@
 import { test as base, expect } from '@playwright/test';
 import { LoginPage } from '../pages/login.page';
 import { DashboardPage } from '../pages/dashboard.page';
+import { LeadsPage } from '../pages/leads.page';
 
 // Định nghĩa kiểu dữ liệu cho custom fixtures
 type CustomFixtures = {
   loginPage: LoginPage;
   dashboardPage: DashboardPage;
+  leadsPage: LeadsPage;
 };
 
 /**
@@ -20,7 +22,10 @@ export const test = base.extend<CustomFixtures>({
     const dashboardPage = new DashboardPage(page);
     await use(dashboardPage);
   },
+  leadsPage: async ({ page }, use) => {
+    const leadsPage = new LeadsPage(page);
+    await use(leadsPage);
+  },
 });
 
 export { expect };
-
