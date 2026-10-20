@@ -22,14 +22,14 @@ export default defineConfig({
     ['allure-playwright', { outputFolder: 'allure-results' }],
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'https://demo.playwright.dev',
+    baseURL: process.env.BASE_URL || 'https://vntest-lims.pirago.work',
     // Rule: Viewport bắt buộc 1920x1080 cho desktop UI testing
     viewport: { width: 1920, height: 1080 },
     // Rule: Mở browser thật (headed) khi debug local, headless trên CI hoặc khi HEADLESS=true
     headless: process.env.HEADLESS !== undefined ? process.env.HEADLESS === 'true' : !!process.env.CI,
-    // Độ trễ tự nhiên (slowMo) giúp UI kịp render, tránh race condition và dễ dàng theo dõi bằng mắt thường
+    // Độ trễ tự nhiên (slowMo) khi debug local (400ms) để theo dõi UI, trên CI để 0ms để tối ưu tốc độ
     launchOptions: {
-      slowMo: process.env.SLOW_MO !== undefined ? parseInt(process.env.SLOW_MO) : 400,
+      slowMo: process.env.SLOW_MO !== undefined ? parseInt(process.env.SLOW_MO) : (process.env.CI ? 0 : 400),
       args: ['--ignore-certificate-errors'],
     },
     actionTimeout: 15000,
