@@ -1,0 +1,19 @@
+{
+  "validUser": {
+    "username": "thaihd_admin",
+    "password": "Password@123",
+    "role": "Admin",
+    "displayName": "Thái Hoàng Đình"
+  },
+  "invalidUser": {
+    "username": "invalid_user",
+    "password": "WrongPassword@123",
+    "expectedError": "Tài khoản hoặc mật khẩu không chính xác"
+  },
+  "lockedUser": {
+    "username": "locked_user",
+    "password": "Password@123",
+    "expectedError": "Tài khoản của bạn đã bị khóa"
+  }
+}
+

@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Test outputs & reports
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+allure-results/
+allure-report/
+
+# Environment variables & secrets
+.env
+.env.local
+.agent/skills/**/credentials/
+.agent/**/credentials/
+
+# System and temporary files
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+*_debug.txt
+*_output.txt
+page_snapshot.md
+snapshot_*.md
+dom_dump.txt
+html_dump.html
+network_requests.txt
+console_log.txt
