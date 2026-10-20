@@ -33,4 +33,7 @@ html_dump.html
 network_requests.txt
 console_log.txt
 out_inspect/
+inspect_*/
+inspect_*.js
+/*.js
 scratch_*
