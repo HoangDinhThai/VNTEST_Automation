@@ -30,6 +30,7 @@ export default defineConfig({
     // Độ trễ tự nhiên (slowMo) giúp UI kịp render, tránh race condition và dễ dàng theo dõi bằng mắt thường
     launchOptions: {
       slowMo: process.env.SLOW_MO !== undefined ? parseInt(process.env.SLOW_MO) : 400,
+      args: ['--ignore-certificate-errors'],
     },
     actionTimeout: 15000,
     navigationTimeout: 30000,

@@ -32,3 +32,5 @@ dom_dump.txt
 html_dump.html
 network_requests.txt
 console_log.txt
+out_inspect/
+scratch_*
