@@ -6,6 +6,8 @@ import { CustomersPage } from '../pages/customers.page';
 import { PartnersPage } from '../pages/partners.page';
 import { CollaboratorsPage } from '../pages/collaborators.page';
 import { SingleCriteriaPage } from '../pages/single-criteria.page';
+import { PersonnelPage } from '../pages/personnel.page';
+import { FormulaPage } from '../pages/formula.page';
 
 // Định nghĩa kiểu dữ liệu cho custom fixtures
 type CustomFixtures = {
@@ -16,6 +18,8 @@ type CustomFixtures = {
   partnersPage: PartnersPage;
   collaboratorsPage: CollaboratorsPage;
   singleCriteriaPage: SingleCriteriaPage;
+  personnelPage: PersonnelPage;
+  formulaPage: FormulaPage;
 };
 
 /**
@@ -49,6 +53,14 @@ export const test = base.extend<CustomFixtures>({
   singleCriteriaPage: async ({ page }, use) => {
     const singleCriteriaPage = new SingleCriteriaPage(page);
     await use(singleCriteriaPage);
+  },
+  personnelPage: async ({ page }, use) => {
+    const personnelPage = new PersonnelPage(page);
+    await use(personnelPage);
+  },
+  formulaPage: async ({ page }, use) => {
+    const formulaPage = new FormulaPage(page);
+    await use(formulaPage);
   },
 });
 

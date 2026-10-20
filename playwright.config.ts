@@ -10,7 +10,7 @@ export default defineConfig({
   // Chạy tuần tự 1 worker cho module auth để tránh nghẽn server dev & xung đột session
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.RETRIES !== undefined ? parseInt(process.env.RETRIES) : (process.env.CI ? 2 : 0),
   workers: process.env.WORKERS ? parseInt(process.env.WORKERS) : 1,
   timeout: 60000,
   expect: {
@@ -25,8 +25,8 @@ export default defineConfig({
     baseURL: process.env.BASE_URL || 'https://demo.playwright.dev',
     // Rule: Viewport bắt buộc 1920x1080 cho desktop UI testing
     viewport: { width: 1920, height: 1080 },
-    // Rule: Mở browser thật (headed) khi debug local, headless trên CI
-    headless: !!process.env.CI,
+    // Rule: Mở browser thật (headed) khi debug local, headless trên CI hoặc khi HEADLESS=true
+    headless: process.env.HEADLESS !== undefined ? process.env.HEADLESS === 'true' : !!process.env.CI,
     // Độ trễ tự nhiên (slowMo) giúp UI kịp render, tránh race condition và dễ dàng theo dõi bằng mắt thường
     launchOptions: {
       slowMo: process.env.SLOW_MO !== undefined ? parseInt(process.env.SLOW_MO) : 400,

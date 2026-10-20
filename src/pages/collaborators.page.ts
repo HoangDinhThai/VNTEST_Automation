@@ -132,7 +132,7 @@ export class CollaboratorsPage extends BasePage {
     this.modalSaveAndContinueButton = this.modal.getByRole('button', { name: 'Lưu & tạo tiếp', exact: true });
     this.modalUpdateButton = this.modal.getByRole('button', { name: 'Cập nhật', exact: true });
     this.invalidFormError = page.getByText('Thông tin nhập chưa hợp lệ. Vui lòng kiểm tra lại.');
-    this.emailFormatError = page.getByText('Email không đúng định dạng.');
+    this.emailFormatError = page.getByText(/Email không hợp lệ|Email không đúng định dạng/i);
     this.createSuccessToast = page.getByText('Đã lưu cộng tác viên mới.');
     this.updateSuccessToast = page.getByText(/Đã cập nhật|Đã lưu/i);
 

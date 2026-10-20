@@ -145,7 +145,7 @@ export class PartnersPage extends BasePage {
     this.updateSuccessToast = page.getByText(/Đã cập nhật|Đã lưu/i);
 
     // Ngăn Chi tiết (Drawer)
-    this.detailPanel = page.locator('aside.detail-panel.open, aside.detail-panel').first();
+    this.detailPanel = page.locator('aside.detail-panel.open');
     this.detailCloseButton = this.detailPanel.locator('button.dp-close, button[aria-label="Đóng"], button').first();
     this.detailTitle = this.detailPanel.locator('.dp-title, h3, h2, .name').first();
     this.detailInfoTab = this.detailPanel.locator('.dp-tab, button').filter({ hasText: 'THÔNG TIN' }).first();

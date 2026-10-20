@@ -74,6 +74,7 @@ export class SingleCriteriaPage extends BasePage {
   readonly criteriaRows: Locator;
   readonly firstCriteriaRow: Locator;
   readonly firstCriteriaCheckbox: Locator;
+  readonly firstCriteriaCodeCell: Locator;
   readonly criteriaSelectAllCheckbox: Locator;
 
   // Hộp thoại Thêm mới & Chỉnh sửa Chỉ tiêu (Chung cấu trúc Form)
@@ -126,6 +127,11 @@ export class SingleCriteriaPage extends BasePage {
   readonly salePriceRequiredError: Locator;
   readonly turnaroundTimeRequiredError: Locator;
   readonly testingMethodRequiredError: Locator;
+
+  // Hộp thoại Xác nhận Hủy thay đổi (Unsaved Changes Dialog)
+  readonly unsavedChangesDialog: Locator;
+  readonly continueEditingButton: Locator;
+  readonly discardAndCloseButton: Locator;
 
   // Hộp thoại Xác nhận Xóa Chỉ tiêu
   readonly deleteCriteriaModal: Locator;
@@ -202,6 +208,7 @@ export class SingleCriteriaPage extends BasePage {
     this.criteriaRows = this.criteriaTable.locator('tbody tr');
     this.firstCriteriaRow = this.criteriaRows.first();
     this.firstCriteriaCheckbox = this.firstCriteriaRow.locator('input.cb');
+    this.firstCriteriaCodeCell = this.firstCriteriaRow.locator('td.mono').first();
     this.criteriaSelectAllCheckbox = this.criteriaTable.locator('thead th.col-checkbox input.cb');
 
     // Hộp thoại Thêm mới & Sửa Chỉ tiêu
@@ -254,6 +261,11 @@ export class SingleCriteriaPage extends BasePage {
     this.salePriceRequiredError = this.criteriaModal.locator('.analyte-create-error').filter({ hasText: /giá bán/i });
     this.turnaroundTimeRequiredError = this.criteriaModal.locator('.analyte-create-error').filter({ hasText: /thời gian kiểm/i });
     this.testingMethodRequiredError = this.criteriaModal.locator('.analyte-create-error').filter({ hasText: /phương pháp/i });
+
+    // Hộp thoại Xác nhận Hủy thay đổi (Unsaved Changes Dialog)
+    this.unsavedChangesDialog = page.locator('.unsaved-changes-dialog');
+    this.continueEditingButton = this.unsavedChangesDialog.getByRole('button', { name: /^Tiếp tục nhập$/i });
+    this.discardAndCloseButton = this.unsavedChangesDialog.getByRole('button', { name: /^Đóng$/i });
 
     // Hộp thoại Xóa Chỉ tiêu
     this.deleteCriteriaModal = page.locator('.modal.analyte-delete-dialog');
@@ -353,6 +365,16 @@ export class SingleCriteriaPage extends BasePage {
   async closeCreateCriteriaModal(): Promise<void> {
     Logger.info('Đóng hộp thoại thêm chỉ tiêu bằng nút "Hủy"');
     await this.criteriaModalCancelButton.click();
+  }
+
+  async discardChangesAndClose(): Promise<void> {
+    Logger.info('Xác nhận đóng hộp thoại và hủy các thay đổi chưa lưu');
+    await this.discardAndCloseButton.click();
+  }
+
+  async continueEditing(): Promise<void> {
+    Logger.info('Chọn tiếp tục nhập trên hộp thoại cảnh báo');
+    await this.continueEditingButton.click();
   }
 
   async fillCriteriaForm(data: {

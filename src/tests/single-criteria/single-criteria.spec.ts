@@ -326,11 +326,18 @@ test.describe('Module Quản lý Chỉ tiêu lẻ (/chi-tieu-le) - Hệ thống 
     await singleCriteriaPage.openEditCriteriaModal();
     await expect(singleCriteriaPage.editCriteriaModalTitle).toBeVisible();
 
-    Logger.step(3, 'Thay đổi tên nhưng nhấn nút "Hủy"');
+    Logger.step(3, 'Thay đổi tên và nhấn nút "Hủy" trên modal');
     await singleCriteriaPage.criteriaNameInput.fill(`${ctName} - Thay đổi`);
     await singleCriteriaPage.closeCreateCriteriaModal();
 
-    Logger.step('Verify', 'Modal đóng lại và tên chỉ tiêu giữ nguyên giá trị ban đầu');
+    Logger.step('Verify', 'Hiển thị hộp thoại cảnh báo "Bạn có thay đổi chưa lưu"');
+    await expect(singleCriteriaPage.unsavedChangesDialog).toBeVisible();
+
+    Logger.step(4, 'Xác nhận "Đóng" trên hộp thoại cảnh báo để hủy các thay đổi');
+    await singleCriteriaPage.discardChangesAndClose();
+
+    Logger.step('Verify', 'Hộp thoại đóng lại và tên chỉ tiêu giữ nguyên giá trị ban đầu');
+    await expect(singleCriteriaPage.unsavedChangesDialog).toBeHidden();
     await expect(singleCriteriaPage.criteriaModal).toBeHidden();
     await expect(ctRow).toContainText(ctName);
 
@@ -491,9 +498,8 @@ test.describe('Module Quản lý Chỉ tiêu lẻ (/chi-tieu-le) - Hệ thống 
     await expect(singleCriteriaPage.criteriaRows.first()).toBeVisible();
 
     Logger.step(2, 'Lấy mã chỉ tiêu của dòng đầu tiên để làm từ khóa tìm kiếm');
-    const firstRowText = await singleCriteriaPage.firstCriteriaRow.textContent();
-    const matchCode = firstRowText?.match(/CT[-_A-Za-z0-9]+/);
-    const searchCode = matchCode ? matchCode[0] : 'pH';
+    const rawCode = await singleCriteriaPage.firstCriteriaCodeCell.textContent();
+    const searchCode = rawCode?.trim() || 'CT';
 
     Logger.step(3, `Nhập từ khóa "${searchCode}" vào ô tìm kiếm`);
     await singleCriteriaPage.searchCriteria(searchCode);
