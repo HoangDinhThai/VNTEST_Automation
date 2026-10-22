@@ -101,7 +101,6 @@ export class FormulaPage extends BasePage {
   async open(): Promise<void> {
     Logger.info('Điều hướng tới trang Quản lý công thức tính: /quan-ly-cong-thuc-tinh');
     await this.page.goto('/quan-ly-cong-thuc-tinh');
-    await this.page.waitForLoadState('networkidle');
   }
 
   /**

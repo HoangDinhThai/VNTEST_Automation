@@ -324,7 +324,7 @@ export class TestRequestsPage extends BasePage {
    */
   async open(path = '/yeu-cau-thu-nghiem'): Promise<void> {
     Logger.info(`Điều hướng tới trang Báo giá & YCTN: ${path}`);
-    await this.page.goto(path, { waitUntil: 'networkidle' });
+    await this.page.goto(path);
   }
 
   /**

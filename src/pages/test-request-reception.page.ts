@@ -219,7 +219,7 @@ export class TestRequestReceptionPage extends BasePage {
    */
   async open(path = '/tiep-nhan-yctn'): Promise<void> {
     Logger.info(`Điều hướng tới trang Tiếp nhận YCTN: ${path}`);
-    await this.page.goto(path, { waitUntil: 'networkidle' });
+    await this.page.goto(path);
   }
 
   /**
