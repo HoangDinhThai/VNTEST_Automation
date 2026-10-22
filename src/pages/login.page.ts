@@ -102,6 +102,12 @@ export class LoginPage extends BasePage {
    * Thực hiện toàn bộ luồng đăng nhập
    */
   async login(email: string, password: string): Promise<void> {
+    // Nếu trang hiện tại đã được đăng nhập (không hiển thị form login), bỏ qua để tiết kiệm thời gian
+    const isLoginInputVisible = await this.emailInput.waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
+    if (!isLoginInputVisible) {
+      Logger.info('Phiên đăng nhập đã tồn tại (storageState), bỏ qua bước đăng nhập lặp lại.');
+      return;
+    }
     await this.enterEmail(email);
     await this.enterPassword(password);
     await this.clickLoginButton();

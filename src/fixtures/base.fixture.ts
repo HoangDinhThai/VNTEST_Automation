@@ -11,6 +11,7 @@ import { FormulaPage } from '../pages/formula.page';
 import { TestRequestsPage } from '../pages/test-requests.page';
 import { TestRequestReceptionPage } from '../pages/test-request-reception.page';
 import { TaskAssignmentPage } from '../pages/task-assignment.page';
+import { HoSoTnPage } from '../pages/ho-so-tn.page';
 
 // Định nghĩa kiểu dữ liệu cho custom fixtures
 type CustomFixtures = {
@@ -26,6 +27,7 @@ type CustomFixtures = {
   testRequestsPage: TestRequestsPage;
   testRequestReceptionPage: TestRequestReceptionPage;
   taskAssignmentPage: TaskAssignmentPage;
+  hoSoTnPage: HoSoTnPage;
 };
 
 /**
@@ -79,6 +81,10 @@ export const test = base.extend<CustomFixtures>({
   taskAssignmentPage: async ({ page }, use) => {
     const taskAssignmentPage = new TaskAssignmentPage(page);
     await use(taskAssignmentPage);
+  },
+  hoSoTnPage: async ({ page }, use) => {
+    const hoSoTnPage = new HoSoTnPage(page);
+    await use(hoSoTnPage);
   },
 });
 

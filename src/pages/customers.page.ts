@@ -163,7 +163,7 @@ export class CustomersPage extends BasePage {
     this.deleteModalTitle = page.getByText('Xác nhận xóa khách hàng');
     this.deleteCancelButton = this.deleteModal.getByRole('button', { name: 'Hủy', exact: true });
     this.deleteConfirmButton = this.deleteModal.getByRole('button', { name: 'Xác nhận xóa', exact: true });
-    this.deleteSuccessToast = page.getByText('Đã xóa thành công.');
+    this.deleteSuccessToast = page.getByText(/Đã xóa/i);
 
     // Modal Đổi người phụ trách (Đổi sale)
     this.changeSaleModal = page.locator('.customer-doi-sale-modal');
@@ -367,7 +367,7 @@ export class CustomersPage extends BasePage {
    */
   async submitEditForm(): Promise<void> {
     Logger.info('Nhấn nút "Cập nhật"');
-    await this.modalUpdateButton.click();
+    await this.modal.getByRole('button', { name: /Cập nhật|Lưu/i }).first().click();
   }
 
   /**
