@@ -13,6 +13,7 @@ import { TestRequestReceptionPage } from '../pages/test-request-reception.page';
 import { TaskAssignmentPage } from '../pages/task-assignment.page';
 import { HoSoTnPage } from '../pages/ho-so-tn.page';
 import { TruongBpKtraPage } from '../pages/truong-bp-ktra.page';
+import { RaSoatKqPage } from '../pages/ra-soat-kq.page';
 
 // Định nghĩa kiểu dữ liệu cho custom fixtures
 type CustomFixtures = {
@@ -30,6 +31,7 @@ type CustomFixtures = {
   taskAssignmentPage: TaskAssignmentPage;
   hoSoTnPage: HoSoTnPage;
   truongBpKtraPage: TruongBpKtraPage;
+  raSoatKqPage: RaSoatKqPage;
 };
 
 /**
@@ -91,6 +93,10 @@ export const test = base.extend<CustomFixtures>({
   truongBpKtraPage: async ({ page }, use) => {
     const truongBpKtraPage = new TruongBpKtraPage(page);
     await use(truongBpKtraPage);
+  },
+  raSoatKqPage: async ({ page }, use) => {
+    const raSoatKqPage = new RaSoatKqPage(page);
+    await use(raSoatKqPage);
   },
 });
 

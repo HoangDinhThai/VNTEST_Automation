@@ -39,6 +39,10 @@
     "test:truong-bp-ktra": "playwright test src/tests/truong-bp-ktra",
     "test:truong-bp-ktra:critical": "playwright test src/tests/truong-bp-ktra --grep \"@critical\"",
     "test:truong-bp-ktra:high": "playwright test src/tests/truong-bp-ktra --grep \"@high\"",
+    "test:ra-soat-kq": "playwright test src/tests/ra-soat-kq",
+    "test:ra-soat-kq:critical": "playwright test src/tests/ra-soat-kq --grep \"@critical\"",
+    "test:ra-soat-kq:high": "playwright test src/tests/ra-soat-kq --grep \"@high\"",
+    "test:ra-soat-kq:destructive": "RA_SOAT_DESTRUCTIVE=true playwright test src/tests/ra-soat-kq",
     "report": "playwright show-report",
     "allure:generate": "allure generate ./allure-results --clean -o ./allure-report",
     "allure:open": "allure open ./allure-report"
