@@ -32,7 +32,6 @@
     "test:personnel": "playwright test src/tests/personnel",
     "test:personnel:critical": "playwright test src/tests/personnel --grep \"@critical\"",
     "test:personnel:high": "playwright test src/tests/personnel --grep \"@high\"",
-    "test:slow": "SLOW_MO=600 playwright test src/tests/auth --headed",
     "report": "playwright show-report",
     "allure:generate": "allure generate ./allure-results --clean -o ./allure-report",
     "allure:open": "allure open ./allure-report"

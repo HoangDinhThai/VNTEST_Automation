@@ -38,7 +38,8 @@ export class LoginPage extends BasePage {
    * Mở trang đăng nhập
    */
   async open(url = '/dang-nhap'): Promise<void> {
-    await this.navigateTo(url);
+    Logger.info(`Điều hướng tới: ${url}`);
+    await this.page.goto(url);
   }
 
   /**
