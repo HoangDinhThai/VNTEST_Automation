@@ -3,8 +3,12 @@ import { Logger } from '../../utils/logger';
 import users from '../../../test-data/users.json';
 
 test.describe('Module Hồ sơ TN (/ho-so-tn) - Hệ thống VNTEST LIMS', () => {
-  test.beforeEach(async ({ hoSoTnPage }) => {
-    Logger.step('Setup', 'Điều hướng tới màn hình Hồ sơ TN');
+  test.beforeEach(async ({ loginPage, hoSoTnPage, page }) => {
+    Logger.step('Setup', 'Đăng nhập vào hệ thống và điều hướng tới màn hình Hồ sơ TN');
+    await loginPage.open('/dang-nhap');
+    await loginPage.login(users.validUser.username, users.validUser.password);
+    await page.waitForURL('https://vntest-lims.pirago.work/', { timeout: 15000 });
+
     await hoSoTnPage.open('/ho-so-tn');
     await expect(hoSoTnPage.tabHoSoTN).toBeVisible({ timeout: 15000 });
     await expect(hoSoTnPage.table).toBeVisible({ timeout: 15000 });

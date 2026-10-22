@@ -4,8 +4,12 @@ import users from '../../../test-data/users.json';
 import { TestDataGenerator } from '../../utils/test-data-generator';
 
 test.describe('Module Quản lý Lead / Cơ hội - Hệ thống VNTEST LIMS', () => {
-  test.beforeEach(async ({ leadsPage }) => {
-    Logger.step('Setup', 'Điều hướng tới trang danh sách Lead');
+  test.beforeEach(async ({ loginPage, leadsPage, page }) => {
+    Logger.step('Setup', 'Đăng nhập và điều hướng tới trang danh sách Lead');
+    await loginPage.open('/dang-nhap');
+    await loginPage.login(users.validUser.username, users.validUser.password);
+    await page.waitForURL('https://vntest-lims.pirago.work/', { timeout: 15000 });
+
     await leadsPage.open('/leads');
     await expect(leadsPage.pageTab).toBeVisible({ timeout: 15000 });
   });

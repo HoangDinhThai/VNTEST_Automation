@@ -3,8 +3,12 @@ import { Logger } from '../../utils/logger';
 import users from '../../../test-data/users.json';
 
 test.describe('Module Quản lý Công thức tính (/quan-ly-cong-thuc-tinh) - Hệ thống VNTEST LIMS', () => {
-  test.beforeEach(async ({ formulaPage }) => {
-    Logger.step('Setup', 'Điều hướng tới trang Quản lý công thức tính');
+  test.beforeEach(async ({ loginPage, formulaPage, page }) => {
+    Logger.step('Setup', 'Đăng nhập vào hệ thống và điều hướng tới trang Quản lý công thức tính');
+    await loginPage.open('/dang-nhap');
+    await loginPage.login(users.validUser.username, users.validUser.password);
+    await page.waitForURL('https://vntest-lims.pirago.work/', { timeout: 15000 });
+
     await formulaPage.open();
     await expect(formulaPage.formulaTab).toBeVisible({ timeout: 15000 });
   });

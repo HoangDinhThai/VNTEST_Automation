@@ -3,8 +3,12 @@ import { Logger } from '../../utils/logger';
 import users from '../../../test-data/users.json';
 
 test.describe('Module Quản lý Báo giá & Yêu cầu thử nghiệm (/yeu-cau-thu-nghiem) - Hệ thống VNTEST LIMS', () => {
-  test.beforeEach(async ({ testRequestsPage }) => {
-    Logger.step('Setup', 'Điều hướng tới trang Báo giá & Yêu cầu thử nghiệm');
+  test.beforeEach(async ({ loginPage, testRequestsPage, page }) => {
+    Logger.step('Setup', 'Đăng nhập vào hệ thống và điều hướng tới trang Báo giá & Yêu cầu thử nghiệm');
+    await loginPage.open('/dang-nhap');
+    await loginPage.login(users.validUser.username, users.validUser.password);
+    await page.waitForURL('https://vntest-lims.pirago.work/', { timeout: 15000 });
+
     await testRequestsPage.open('/yeu-cau-thu-nghiem');
     await expect(testRequestsPage.bgAndYctnTab).toBeVisible({ timeout: 15000 });
     await expect(testRequestsPage.table).toBeVisible({ timeout: 15000 });

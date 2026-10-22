@@ -3,8 +3,12 @@ import { Logger } from '../../utils/logger';
 import users from '../../../test-data/users.json';
 
 test.describe('Module Quản lý Đối tác (Doanh nghiệp) - Hệ thống VNTEST LIMS', () => {
-  test.beforeEach(async ({ partnersPage }) => {
-    Logger.step('Setup', 'Điều hướng tới trang Đối tác & CTV');
+  test.beforeEach(async ({ loginPage, partnersPage, page }) => {
+    Logger.step('Setup', 'Đăng nhập và điều hướng tới trang Đối tác & CTV');
+    await loginPage.open('/dang-nhap');
+    await loginPage.login(users.validUser.username, users.validUser.password);
+    await page.waitForURL('https://vntest-lims.pirago.work/', { timeout: 15000 });
+
     await partnersPage.open('/doi-tac');
     await expect(partnersPage.partnersTab).toBeVisible({ timeout: 15000 });
     await expect(partnersPage.sectionHeader).toBeVisible({ timeout: 15000 });

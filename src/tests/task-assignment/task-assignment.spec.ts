@@ -2,7 +2,10 @@ import { test, expect } from '../../fixtures/base.fixture';
 import users from '../../../test-data/users.json';
 
 test.describe('Màn hình Giao việc (/giao-viec - Tab GIAO VIỆC)', () => {
-  test.beforeEach(async ({ taskAssignmentPage }) => {
+  test.beforeEach(async ({ loginPage, taskAssignmentPage, page }) => {
+    await loginPage.open('/dang-nhap');
+    await loginPage.login(users.validUser.username, users.validUser.password);
+    await page.waitForURL('https://vntest-lims.pirago.work/', { timeout: 15000 });
     await taskAssignmentPage.open('/giao-viec');
   });
 
