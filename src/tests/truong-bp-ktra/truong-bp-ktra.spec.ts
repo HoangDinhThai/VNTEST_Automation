@@ -53,8 +53,15 @@ test.describe('Module Trưởng BP Kiểm tra (/truong-bo-phan-kiem-tra) - Hệ 
 
   test('TC_TBP_003: Hiển thị đầy đủ các cột của bảng chỉ tiêu trên thẻ mẫu', {
     tag: ['@smoke', '@high']
-  }, async ({ truongBpKtraPage }) => {
-    Logger.step(1, 'Kiểm tra các cột tiêu đề của bảng chỉ tiêu (Table 0)');
+  }, async ({ truongBpKtraPage, page }) => {
+    Logger.step(1, 'Đảm bảo hồ sơ đầu tiên được chọn để nạp bảng chỉ tiêu');
+    if (!(await truongBpKtraPage.ctTable.isVisible()) && (await truongBpKtraPage.hsTableRows.count()) > 0) {
+      await truongBpKtraPage.selectHsRow(0);
+      await page.waitForTimeout(500);
+    }
+
+    Logger.step(2, 'Kiểm tra các cột tiêu đề của bảng chỉ tiêu (Table 0)');
+    await expect(truongBpKtraPage.ctTable).toBeVisible();
     const headers = await truongBpKtraPage.ctTableHeaders.allInnerTexts();
     const cleanHeaders = headers.map(h => h.trim()).filter(h => h.length > 0);
 
@@ -70,13 +77,19 @@ test.describe('Module Trưởng BP Kiểm tra (/truong-bo-phan-kiem-tra) - Hệ 
 
   test('TC_TBP_004: Kiểm tra các ô ĐVT, PP THỬ và KẾT QUẢ trên dòng chỉ tiêu của mẫu', {
     tag: ['@normal']
-  }, async ({ truongBpKtraPage }) => {
-    Logger.step(1, 'Kiểm tra sự tồn tại của ô ĐVT, PP THỬ và KẾT QUẢ trên dòng đầu tiên');
+  }, async ({ truongBpKtraPage, page }) => {
+    Logger.step(1, 'Đảm bảo hồ sơ đầu tiên được chọn');
+    if (!(await truongBpKtraPage.ctTable.isVisible()) && (await truongBpKtraPage.hsTableRows.count()) > 0) {
+      await truongBpKtraPage.selectHsRow(0);
+      await page.waitForTimeout(500);
+    }
+
+    Logger.step(2, 'Kiểm tra sự tồn tại của ô ĐVT, PP THỬ và KẾT QUẢ trên dòng đầu tiên');
     await expect(truongBpKtraPage.ctRowDvt).toBeVisible();
     await expect(truongBpKtraPage.ctRowPpThu).toBeVisible();
     await expect(truongBpKtraPage.ctRowKq).toBeVisible();
 
-    Logger.step(2, 'Kiểm tra các cột tham số LOD, LOQ, VL hiển thị ký hiệu');
+    Logger.step(3, 'Kiểm tra các cột tham số LOD, LOQ, VL hiển thị ký hiệu');
     await expect(truongBpKtraPage.ctRowLod).toBeVisible();
     await expect(truongBpKtraPage.ctRowLoq).toBeVisible();
     await expect(truongBpKtraPage.ctRowVl).toBeVisible();
@@ -155,19 +168,12 @@ test.describe('Module Trưởng BP Kiểm tra (/truong-bo-phan-kiem-tra) - Hệ 
 
   test('TC_TBP_009: Tìm kiếm với từ khóa không tồn tại hiển thị bảng trống hoặc không có dòng khớp', {
     tag: ['@normal']
-  }, async ({ truongBpKtraPage, page }) => {
+  }, async ({ truongBpKtraPage }) => {
     Logger.step(1, 'Nhập từ khóa không tồn tại "KEYWORD_KHONG_TON_TAI_9999"');
     await truongBpKtraPage.search('KEYWORD_KHONG_TON_TAI_9999');
-    await page.waitForTimeout(500);
 
     Logger.step(2, 'Verify bảng không có dòng kết quả nào hoặc hiển thị trạng thái rỗng');
-    const rowCount = await truongBpKtraPage.hsTableRows.count();
-    if (rowCount === 1) {
-      const text = await truongBpKtraPage.hsTableRows.first().innerText();
-      expect(text.trim().length === 0 || text.includes('Không có') || text.includes('—')).toBeTruthy();
-    } else {
-      expect(rowCount).toBe(0);
-    }
+    await expect(truongBpKtraPage.hsTableRows).toHaveCount(0, { timeout: 10000 });
   });
 
   test('TC_TBP_010: Nhấn nút "Hủy" xóa từ khóa tìm kiếm và phục hồi danh sách ban đầu', {

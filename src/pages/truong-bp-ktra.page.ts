@@ -99,7 +99,7 @@ export class TruongBpKtraPage extends BasePage {
     this.sampleBadgeM1 = page.locator('span, div, .badge').filter({ hasText: /^M1/ }).first();
     this.sampleCodeText = page.locator('text=/S\\d+\\.\\d+/').first();
     this.sampleProgressText = page.locator('text=/\\d+ CT của bạn/i').first();
-    this.ctTable = page.locator('table.ct-table, table:has(th:has-text("CHỈ TIÊU"))').first();
+    this.ctTable = page.locator('table.ct-table, table').filter({ has: page.locator('th:has-text("PP THỬ")') }).first();
     this.ctTableHeaders = this.ctTable.locator('thead th');
     this.ctTableRows = this.ctTable.locator('tbody tr');
     this.ctRowDvt = this.ctTableRows.first().locator('td').nth(1).locator('.ct-input, input');
