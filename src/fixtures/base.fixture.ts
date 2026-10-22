@@ -8,6 +8,9 @@ import { CollaboratorsPage } from '../pages/collaborators.page';
 import { SingleCriteriaPage } from '../pages/single-criteria.page';
 import { PersonnelPage } from '../pages/personnel.page';
 import { FormulaPage } from '../pages/formula.page';
+import { TestRequestsPage } from '../pages/test-requests.page';
+import { TestRequestReceptionPage } from '../pages/test-request-reception.page';
+import { TaskAssignmentPage } from '../pages/task-assignment.page';
 
 // Định nghĩa kiểu dữ liệu cho custom fixtures
 type CustomFixtures = {
@@ -20,6 +23,9 @@ type CustomFixtures = {
   singleCriteriaPage: SingleCriteriaPage;
   personnelPage: PersonnelPage;
   formulaPage: FormulaPage;
+  testRequestsPage: TestRequestsPage;
+  testRequestReceptionPage: TestRequestReceptionPage;
+  taskAssignmentPage: TaskAssignmentPage;
 };
 
 /**
@@ -61,6 +67,18 @@ export const test = base.extend<CustomFixtures>({
   formulaPage: async ({ page }, use) => {
     const formulaPage = new FormulaPage(page);
     await use(formulaPage);
+  },
+  testRequestsPage: async ({ page }, use) => {
+    const testRequestsPage = new TestRequestsPage(page);
+    await use(testRequestsPage);
+  },
+  testRequestReceptionPage: async ({ page }, use) => {
+    const testRequestReceptionPage = new TestRequestReceptionPage(page);
+    await use(testRequestReceptionPage);
+  },
+  taskAssignmentPage: async ({ page }, use) => {
+    const taskAssignmentPage = new TaskAssignmentPage(page);
+    await use(taskAssignmentPage);
   },
 });
 
