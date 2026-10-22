@@ -132,7 +132,7 @@ export class CollaboratorsPage extends BasePage {
     this.modalSaveAndContinueButton = this.modal.getByRole('button', { name: 'Lưu & tạo tiếp', exact: true });
     this.modalUpdateButton = this.modal.getByRole('button', { name: 'Cập nhật', exact: true });
     this.invalidFormError = page.getByText('Thông tin nhập chưa hợp lệ. Vui lòng kiểm tra lại.');
-    this.emailFormatError = page.getByText(/Email không hợp lệ|Email không đúng định dạng/i);
+    this.emailFormatError = this.modal.getByText(/Email không hợp lệ|Email không đúng định dạng/i).or(page.getByText(/Email không hợp lệ|Email không đúng định dạng/i));
     this.createSuccessToast = page.getByText('Đã lưu cộng tác viên mới.');
     this.updateSuccessToast = page.getByText(/Đã cập nhật|Đã lưu/i);
 
@@ -233,6 +233,7 @@ export class CollaboratorsPage extends BasePage {
     Logger.info('Nhấn nút "Thêm" để mở hộp thoại Thêm Cộng tác viên mới');
     await this.addCtvButton.click();
     await this.page.waitForTimeout(400);
+    await this.modalTitle.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
   }
 
   /**
@@ -241,7 +242,7 @@ export class CollaboratorsPage extends BasePage {
   async closeCreateModal(): Promise<void> {
     Logger.info('Nhấn nút "Hủy" trên hộp thoại CTV');
     await this.modalCancelButton.click();
-    await this.page.waitForTimeout(300);
+    await this.page.waitForTimeout(400);
   }
 
   /**

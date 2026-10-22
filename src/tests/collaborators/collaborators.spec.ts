@@ -212,6 +212,7 @@ test.describe('Module Quản lý Cộng tác viên (Cá nhân) - Hệ thống VN
 
     Logger.step(2, 'Nhập email sai định dạng và nhấn "Lưu"');
     await collaboratorsPage.emailInput.fill('invalid-ctv-email');
+    await collaboratorsPage.emailInput.press('Tab');
     await collaboratorsPage.submitForm();
 
     Logger.step('Verify', 'Hiển thị thông báo "Email không đúng định dạng."');

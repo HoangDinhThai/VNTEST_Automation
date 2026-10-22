@@ -214,6 +214,7 @@ test.describe('Module Quản lý Đối tác (Doanh nghiệp) - Hệ thống VNT
 
     Logger.step(2, 'Nhập email sai định dạng và nhấn "Lưu"');
     await partnersPage.contactEmailInput.fill('invalid-email-format');
+    await partnersPage.contactEmailInput.press('Tab');
     await partnersPage.submitForm();
 
     Logger.step('Verify', 'Hiển thị thông báo "Email không đúng định dạng."');
