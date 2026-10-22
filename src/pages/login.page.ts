@@ -38,6 +38,13 @@ export class LoginPage extends BasePage {
    * Mở trang đăng nhập
    */
   async open(url = '/dang-nhap'): Promise<void> {
+    const cookies = await this.page.context().cookies();
+    const hasSession = cookies.some(c => c.name.includes('session') || c.name === 'dev-vntest-lims-session');
+    if (hasSession && (url === '/dang-nhap' || url.includes('dang-nhap'))) {
+      Logger.info('Đã có phiên đăng nhập sẵn (storageState), điều hướng thẳng tới trang chủ /');
+      await this.page.goto('/');
+      return;
+    }
     Logger.info(`Điều hướng tới: ${url}`);
     await this.page.goto(url);
   }
@@ -102,10 +109,10 @@ export class LoginPage extends BasePage {
    * Thực hiện toàn bộ luồng đăng nhập
    */
   async login(email: string, password: string): Promise<void> {
-    // Nếu trang hiện tại đã được đăng nhập (không hiển thị form login), bỏ qua để tiết kiệm thời gian
-    const isLoginInputVisible = await this.emailInput.waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
-    if (!isLoginInputVisible) {
-      Logger.info('Phiên đăng nhập đã tồn tại (storageState), bỏ qua bước đăng nhập lặp lại.');
+    const cookies = await this.page.context().cookies();
+    const hasSession = cookies.some(c => c.name.includes('session') || c.name === 'dev-vntest-lims-session');
+    if (hasSession && !this.page.url().includes('dang-nhap')) {
+      Logger.info('Phiên đăng nhập đã sẵn sàng (storageState), bỏ qua bước đăng nhập lặp lại.');
       return;
     }
     await this.enterEmail(email);
