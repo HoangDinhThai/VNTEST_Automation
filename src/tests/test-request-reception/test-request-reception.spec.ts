@@ -3,12 +3,8 @@ import { Logger } from '../../utils/logger';
 import users from '../../../test-data/users.json';
 
 test.describe('Module Tiếp nhận Yêu cầu thử nghiệm (/tiep-nhan-yctn) - Hệ thống VNTEST LIMS', () => {
-  test.beforeEach(async ({ loginPage, testRequestReceptionPage, page }) => {
-    Logger.step('Setup', 'Đăng nhập vào hệ thống và điều hướng tới màn hình Tiếp nhận YCTN');
-    await loginPage.open('/dang-nhap');
-    await loginPage.login(users.validUser.username, users.validUser.password);
-    await page.waitForURL('https://vntest-lims.pirago.work/', { timeout: 15000 });
-
+  test.beforeEach(async ({ testRequestReceptionPage }) => {
+    Logger.step('Setup', 'Điều hướng tới màn hình Tiếp nhận YCTN');
     await testRequestReceptionPage.open('/tiep-nhan-yctn');
     await expect(testRequestReceptionPage.receiveYctnTab).toBeVisible({ timeout: 15000 });
     await expect(testRequestReceptionPage.table).toBeVisible({ timeout: 15000 });

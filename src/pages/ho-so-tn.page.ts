@@ -236,3 +236,4 @@ export class HoSoTnPage extends BasePage {
     await this.btnCancelHS.click();
   }
 }
+

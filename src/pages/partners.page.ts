@@ -240,7 +240,6 @@ export class PartnersPage extends BasePage {
   async openCreateModal(): Promise<void> {
     Logger.info('Nhấn nút "Thêm" để mở hộp thoại Thêm Đối tác mới');
     await this.addPartnerButton.click();
-    await this.page.waitForTimeout(400);
     await this.modalTitle.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
   }
 
@@ -250,7 +249,7 @@ export class PartnersPage extends BasePage {
   async closeCreateModal(): Promise<void> {
     Logger.info('Nhấn nút "Hủy" trên hộp thoại');
     await this.modalCancelButton.click();
-    await this.page.waitForTimeout(300);
+    await this.page.waitForTimeout(150);
   }
 
   /**
@@ -259,7 +258,7 @@ export class PartnersPage extends BasePage {
   async openEditModal(): Promise<void> {
     Logger.info('Nhấn nút "Sửa" trên thanh công cụ');
     await this.editPartnerButton.click();
-    await this.page.waitForTimeout(500);
+    await this.modalTitle.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
   }
 
   /**
@@ -268,7 +267,7 @@ export class PartnersPage extends BasePage {
   async openDeleteModal(): Promise<void> {
     Logger.info('Nhấn nút "Xoá" trên thanh công cụ');
     await this.deletePartnerButton.click();
-    await this.page.waitForTimeout(400);
+    await this.deleteModalTitle.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
   }
 
   /**
@@ -334,7 +333,7 @@ export class PartnersPage extends BasePage {
 
     Logger.info('Nhấn nút "Lưu" trên form tạo mới đối tác');
     await this.modalSaveButton.click();
-    await this.page.waitForTimeout(800);
+    await this.page.waitForTimeout(300);
   }
 
   /**
@@ -343,7 +342,7 @@ export class PartnersPage extends BasePage {
   async submitForm(): Promise<void> {
     Logger.info('Nhấn nút "Lưu" trên hộp thoại');
     await this.modalSaveButton.click();
-    await this.page.waitForTimeout(500);
+    await this.page.waitForTimeout(200);
   }
 
   /**
@@ -352,6 +351,6 @@ export class PartnersPage extends BasePage {
   async submitUpdateForm(): Promise<void> {
     Logger.info('Nhấn nút "Cập nhật" trên hộp thoại chỉnh sửa');
     await this.modalUpdateButton.click();
-    await this.page.waitForTimeout(800);
+    await this.page.waitForTimeout(300);
   }
 }

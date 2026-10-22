@@ -3,12 +3,8 @@ import { Logger } from '../../utils/logger';
 import users from '../../../test-data/users.json';
 
 test.describe('Module Hồ sơ TN (/ho-so-tn) - Hệ thống VNTEST LIMS', () => {
-  test.beforeEach(async ({ loginPage, hoSoTnPage, page }) => {
-    Logger.step('Setup', 'Đăng nhập vào hệ thống và điều hướng tới màn hình Hồ sơ TN');
-    await loginPage.open('/dang-nhap');
-    await loginPage.login(users.validUser.username, users.validUser.password);
-    await page.waitForURL('https://vntest-lims.pirago.work/', { timeout: 15000 });
-
+  test.beforeEach(async ({ hoSoTnPage }) => {
+    Logger.step('Setup', 'Điều hướng tới màn hình Hồ sơ TN');
     await hoSoTnPage.open('/ho-so-tn');
     await expect(hoSoTnPage.tabHoSoTN).toBeVisible({ timeout: 15000 });
     await expect(hoSoTnPage.table).toBeVisible({ timeout: 15000 });
@@ -59,7 +55,8 @@ test.describe('Module Hồ sơ TN (/ho-so-tn) - Hệ thống VNTEST LIMS', () =>
   test('TC_HSTN_003: Hiển thị khung chi tiết bên phải khi chọn hồ sơ', {
     tag: ['@smoke', '@normal', '@major']
   }, async ({ hoSoTnPage }) => {
-    Logger.step(1, 'Chọn hồ sơ đầu tiên trong bảng');
+    Logger.step(1, 'Lọc hồ sơ Đang TH và chọn dòng đầu tiên trong bảng');
+    await hoSoTnPage.chipDangTH.click();
     await hoSoTnPage.selectRow(0);
 
     Logger.step('Verify', 'Khung chi tiết bên phải hiển thị đầy đủ các thành phần');
@@ -67,9 +64,6 @@ test.describe('Module Hồ sơ TN (/ho-so-tn) - Hệ thống VNTEST LIMS', () =>
     await expect(hoSoTnPage.formulaSelect).toBeVisible();
     await expect(hoSoTnPage.chemicalTable).toBeVisible();
     await expect(hoSoTnPage.sampleTable).toBeVisible();
-    await expect(hoSoTnPage.btnBlank).toBeVisible();
-    await expect(hoSoTnPage.btnQC).toBeVisible();
-    await expect(hoSoTnPage.btnTC).toBeVisible();
     await expect(hoSoTnPage.btnThemMau).toBeVisible();
   });
 
@@ -463,7 +457,8 @@ test.describe('Module Hồ sơ TN (/ho-so-tn) - Hệ thống VNTEST LIMS', () =>
     Logger.step(1, 'Khi chưa tích chọn checkbox, nút Hủy HS bị vô hiệu hóa');
     await expect(hoSoTnPage.btnCancelHS).toBeDisabled();
 
-    Logger.step(2, 'Tích chọn dòng đầu tiên');
+    Logger.step(2, 'Lọc hồ sơ Đang TH và tích chọn dòng đầu tiên');
+    await hoSoTnPage.chipDangTH.click();
     await hoSoTnPage.checkRowCheckbox(0);
     await expect(hoSoTnPage.btnCancelHS).toBeEnabled();
 

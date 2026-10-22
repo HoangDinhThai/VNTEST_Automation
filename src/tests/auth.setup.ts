@@ -33,3 +33,4 @@ setup('Authenticate once and generate storageState', async ({ page }) => {
   await page.context().storageState({ path: authFile });
   Logger.info(`Đã lưu storageState vào: ${authFile}`);
 });
+

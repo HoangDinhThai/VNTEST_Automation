@@ -4,12 +4,8 @@ import users from '../../../test-data/users.json';
 import { TestDataGenerator } from '../../utils/test-data-generator';
 
 test.describe('Module Quản lý Chỉ tiêu lẻ (/chi-tieu-le) - Hệ thống VNTEST LIMS', () => {
-  test.beforeEach(async ({ loginPage, singleCriteriaPage, page }) => {
-    Logger.step('Setup', 'Đăng nhập vào hệ thống và điều hướng tới trang Chỉ tiêu lẻ');
-    await loginPage.open('/dang-nhap');
-    await loginPage.login(users.validUser.username, users.validUser.password);
-    await page.waitForURL('https://vntest-lims.pirago.work/', { timeout: 15000 });
-
+  test.beforeEach(async ({ singleCriteriaPage }) => {
+    Logger.step('Setup', 'Điều hướng tới trang Chỉ tiêu lẻ');
     await singleCriteriaPage.open();
     await expect(singleCriteriaPage.singleCriteriaTab).toBeVisible({ timeout: 15000 });
   });

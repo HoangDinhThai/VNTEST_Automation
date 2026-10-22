@@ -10,9 +10,6 @@ export class WaitHelper {
    */
   public static async waitForPageLoaded(page: Page): Promise<void> {
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
-      // Bỏ qua nếu network idle bị timeout do background polling
-    });
   }
 
   /**

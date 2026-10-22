@@ -4,12 +4,8 @@ import users from '../../../test-data/users.json';
 import { TestDataGenerator } from '../../utils/test-data-generator';
 
 test.describe('Module Quản lý Khách hàng - Hệ thống VNTEST LIMS', () => {
-  test.beforeEach(async ({ loginPage, customersPage, page }) => {
-    Logger.step('Setup', 'Đăng nhập và điều hướng tới trang danh sách Khách hàng');
-    await loginPage.open('/dang-nhap');
-    await loginPage.login(users.validUser.username, users.validUser.password);
-    await page.waitForURL('https://vntest-lims.pirago.work/', { timeout: 15000 });
-
+  test.beforeEach(async ({ customersPage }) => {
+    Logger.step('Setup', 'Điều hướng tới trang danh sách Khách hàng');
     await customersPage.open('/khach-hang');
     await expect(customersPage.customersTab).toBeVisible({ timeout: 15000 });
   });

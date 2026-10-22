@@ -232,7 +232,6 @@ export class CollaboratorsPage extends BasePage {
   async openCreateModal(): Promise<void> {
     Logger.info('Nhấn nút "Thêm" để mở hộp thoại Thêm Cộng tác viên mới');
     await this.addCtvButton.click();
-    await this.page.waitForTimeout(400);
     await this.modalTitle.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
   }
 
@@ -242,7 +241,7 @@ export class CollaboratorsPage extends BasePage {
   async closeCreateModal(): Promise<void> {
     Logger.info('Nhấn nút "Hủy" trên hộp thoại CTV');
     await this.modalCancelButton.click();
-    await this.page.waitForTimeout(400);
+    await this.page.waitForTimeout(200);
   }
 
   /**
@@ -251,7 +250,7 @@ export class CollaboratorsPage extends BasePage {
   async openEditModal(): Promise<void> {
     Logger.info('Nhấn nút "Sửa" trên thanh công cụ CTV');
     await this.editCtvButton.click();
-    await this.page.waitForTimeout(500);
+    await this.modalTitle.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
   }
 
   /**
@@ -260,7 +259,7 @@ export class CollaboratorsPage extends BasePage {
   async openDeleteModal(): Promise<void> {
     Logger.info('Nhấn nút "Xóa" trên thanh công cụ CTV');
     await this.deleteCtvButton.click();
-    await this.page.waitForTimeout(400);
+    await this.deleteModalTitle.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
   }
 
   /**
@@ -269,7 +268,7 @@ export class CollaboratorsPage extends BasePage {
   async confirmDelete(): Promise<void> {
     Logger.info('Nhấn nút xác nhận xóa trên hộp thoại CTV');
     await this.deleteModalConfirmButton.click();
-    await this.page.waitForTimeout(800);
+    await this.page.waitForTimeout(300);
   }
 
   /**
@@ -278,7 +277,7 @@ export class CollaboratorsPage extends BasePage {
   async cancelDelete(): Promise<void> {
     Logger.info('Nhấn nút "Hủy" trên hộp thoại xác nhận xóa CTV');
     await this.deleteModalCancelButton.click();
-    await this.page.waitForTimeout(300);
+    await this.page.waitForTimeout(150);
   }
 
   /**
@@ -326,7 +325,7 @@ export class CollaboratorsPage extends BasePage {
 
     Logger.info('Nhấn nút "Lưu" trên form tạo mới cộng tác viên');
     await this.modalSaveButton.click();
-    await this.page.waitForTimeout(800);
+    await this.page.waitForTimeout(300);
   }
 
   /**
@@ -335,7 +334,7 @@ export class CollaboratorsPage extends BasePage {
   async submitForm(): Promise<void> {
     Logger.info('Nhấn nút "Lưu" trên hộp thoại CTV');
     await this.modalSaveButton.click();
-    await this.page.waitForTimeout(500);
+    await this.page.waitForTimeout(200);
   }
 
   /**
@@ -344,6 +343,6 @@ export class CollaboratorsPage extends BasePage {
   async submitUpdateForm(): Promise<void> {
     Logger.info('Nhấn nút "Cập nhật" trên hộp thoại chỉnh sửa CTV');
     await this.modalUpdateButton.click();
-    await this.page.waitForTimeout(800);
+    await this.page.waitForTimeout(300);
   }
 }

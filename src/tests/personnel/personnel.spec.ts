@@ -3,12 +3,8 @@ import { Logger } from '../../utils/logger';
 import users from '../../../test-data/users.json';
 
 test.describe('Module Quản lý Nhân sự - Hệ thống VNTEST LIMS', () => {
-  test.beforeEach(async ({ loginPage, personnelPage, page }) => {
-    Logger.step('Setup', 'Đăng nhập và điều hướng tới trang danh sách Nhân sự');
-    await loginPage.open('/dang-nhap');
-    await loginPage.login(users.validUser.username, users.validUser.password);
-    await page.waitForURL('https://vntest-lims.pirago.work/', { timeout: 15000 });
-
+  test.beforeEach(async ({ personnelPage }) => {
+    Logger.step('Setup', 'Điều hướng tới trang danh sách Nhân sự');
     await personnelPage.open('/nhan-su');
     await expect(personnelPage.personnelTab).toBeVisible({ timeout: 15000 });
     await expect(personnelPage.table).toBeVisible({ timeout: 15000 });
