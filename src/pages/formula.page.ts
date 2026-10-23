@@ -49,6 +49,15 @@ export class FormulaPage extends BasePage {
   readonly calculationPrincipleTextarea: Locator;
   readonly saveButton: Locator;
 
+  // Hộp thoại xác nhận (Modal confirm / Dialog)
+  readonly confirmModal: Locator;
+  readonly confirmAcceptButton: Locator;
+  readonly confirmCancelButton: Locator;
+
+  // Hộp thoại Quản lý cột
+  readonly columnManageModal: Locator;
+  readonly columnManageApplyButton: Locator;
+
   constructor(page: Page) {
     super(page);
 
@@ -93,6 +102,13 @@ export class FormulaPage extends BasePage {
     // Nguyên tắc tính & Lưu
     this.calculationPrincipleTextarea = page.locator('#formula-inline-calculation-principle');
     this.saveButton = page.locator('button:has-text("Lưu công thức")').first();
+
+    // Hộp thoại xác nhận & Quản lý cột
+    this.confirmModal = page.locator('.modal, .swal2-container, .ant-modal, .px-modal').first();
+    this.confirmAcceptButton = page.getByRole('button', { name: /^(xác nhận|đồng ý|chấp nhận)$/i }).first();
+    this.confirmCancelButton = page.getByRole('button', { name: /^(hủy|đóng|quay lại)$/i }).first();
+    this.columnManageModal = page.locator('.modal, .ant-modal, .px-modal').filter({ hasText: /quản lý cột/i }).first();
+    this.columnManageApplyButton = page.getByRole('button', { name: /^(áp dụng|lưu|xác nhận)$/i }).first();
   }
 
   /**
@@ -263,5 +279,135 @@ export class FormulaPage extends BasePage {
     Logger.info(`Chọn dòng công thức thứ ${index + 1} trong bảng`);
     await this.rows.nth(index).click();
     await this.page.waitForTimeout(500);
+  }
+
+  /**
+   * Lấy checkbox "Tính giá trị bằng công thức." tại dòng rowIndex (0-based)
+   */
+  getCalculateByFormulaCheckbox(rowIndex: number): Locator {
+    const row = this.unifiedRows.nth(rowIndex);
+    return row.locator('label').filter({ hasText: /Tính giá trị bằng công thức/i }).locator('input[type="checkbox"]').or(
+      row.getByRole('checkbox', { name: /Tính giá trị bằng công thức/i })
+    ).first();
+  }
+
+  /**
+   * Lấy checkbox "Hiển thị trên bảng kết quả" tại dòng rowIndex (0-based)
+   */
+  getDisplayOnResultTableCheckbox(rowIndex: number): Locator {
+    const row = this.unifiedRows.nth(rowIndex);
+    return row.locator('label').filter({ hasText: /Hiển thị trên bảng kết quả/i }).locator('input[type="checkbox"]').or(
+      row.getByRole('checkbox', { name: /Hiển thị trên bảng kết quả/i })
+    ).first();
+  }
+
+  /**
+   * Lấy input "TÊN CỘT" tại dòng rowIndex (0-based)
+   */
+  getColumnNameInput(rowIndex: number): Locator {
+    const row = this.unifiedRows.nth(rowIndex);
+    return row.locator('input[placeholder*="tên cột" i], .formula-column-name input').or(
+      row.locator('div:has(> label:has-text("TÊN CỘT")) input, label:has-text("TÊN CỘT") + input')
+    ).first();
+  }
+
+  /**
+   * Lấy input "ĐỘ RỘNG (PX)" tại dòng rowIndex (0-based)
+   */
+  getColumnWidthInput(rowIndex: number): Locator {
+    const row = this.unifiedRows.nth(rowIndex);
+    return row.locator('input[name*="width" i], .formula-column-width input').or(
+      row.locator('div:has(> label:has-text("ĐỘ RỘNG")) input, label:has-text("ĐỘ RỘNG") + input')
+    ).first();
+  }
+
+  /**
+   * Lấy ô nhập "GIÁ TRỊ MẶC ĐỊNH" tại dòng rowIndex (0-based)
+   */
+  getDefaultValueInput(rowIndex: number): Locator {
+    const row = this.unifiedRows.nth(rowIndex);
+    return row.locator('.formula-unified-default-value-field input').first();
+  }
+
+  /**
+   * Lấy ô nhập biểu thức toán học tại dòng rowIndex (0-based)
+   */
+  getExpressionInput(rowIndex: number): Locator {
+    const row = this.unifiedRows.nth(rowIndex);
+    return row.locator('.formula-expression-input').first();
+  }
+
+  /**
+   * Lấy radio "Xuất phiếu kết quả" tại dòng rowIndex (0-based)
+   */
+  getReportResultRadio(rowIndex: number): Locator {
+    const row = this.unifiedRows.nth(rowIndex);
+    return row.locator('input[name="formula-result-report"]').first();
+  }
+
+  /**
+   * Tìm kiếm công thức theo từ khóa
+   */
+  async search(keyword: string): Promise<void> {
+    Logger.info(`Tìm kiếm công thức với từ khóa: "${keyword}"`);
+    await this.searchInput.fill(keyword);
+    await this.searchInput.press('Enter');
+    await this.page.waitForTimeout(500);
+  }
+
+  /**
+   * Xóa trắng ô tìm kiếm
+   */
+  async clearSearch(): Promise<void> {
+    Logger.info('Xóa nội dung tìm kiếm');
+    await this.searchInput.fill('');
+    await this.searchInput.press('Enter');
+    await this.page.waitForTimeout(500);
+  }
+
+  /**
+   * Nhấn nút "Duyệt" trên toolbar và xác nhận trên modal nếu có
+   */
+  async approveSelected(confirm = true): Promise<void> {
+    Logger.info('Nhấn nút "Duyệt" trên thanh công cụ');
+    await this.approveButton.click();
+    if (confirm) {
+      await this.page.waitForTimeout(300);
+      if (await this.confirmAcceptButton.isVisible()) {
+        await this.confirmAcceptButton.click();
+      }
+    }
+  }
+
+  /**
+   * Nhấn nút "Tạm dừng" trên toolbar và xác nhận trên modal nếu có
+   */
+  async pauseSelected(confirm = true): Promise<void> {
+    Logger.info('Nhấn nút "Tạm dừng" trên thanh công cụ');
+    await this.pauseButton.click();
+    if (confirm) {
+      await this.page.waitForTimeout(300);
+      if (await this.confirmAcceptButton.isVisible()) {
+        await this.confirmAcceptButton.click();
+      }
+    }
+  }
+
+  /**
+   * Nhấn nút "Xóa" trên toolbar và xác nhận hoặc hủy trên modal
+   */
+  async deleteSelected(confirm = true): Promise<void> {
+    Logger.info('Nhấn nút "Xóa" trên thanh công cụ');
+    await this.deleteButton.click();
+    await this.page.waitForTimeout(300);
+    if (confirm) {
+      if (await this.confirmAcceptButton.isVisible()) {
+        await this.confirmAcceptButton.click();
+      }
+    } else {
+      if (await this.confirmCancelButton.isVisible()) {
+        await this.confirmCancelButton.click();
+      }
+    }
   }
 }
