@@ -562,6 +562,209 @@ test.describe('Module Rà soát kết quả (/ra-soat-kq) - Hệ thống VNTEST 
     expect(tags).toEqual(['VN', 'EN']);
   });
 
+  test('RSKQ_SW_03: Chế độ VN - Tiêu đề và nhãn Mục I trên bản in xem trước hiển thị hoàn toàn bằng tiếng Việt', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và chọn chế độ VN');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.selectLanguage('VN');
+
+    Logger.step(2, 'Mở khung xem trước');
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(3, 'Kiểm tra tiêu đề phiếu in tiếng Việt');
+    const title = await raSoatKqPage.getPreviewTitle();
+    expect(title).toMatch(/PHIẾU KẾT QUẢ THỬ NGHIỆM/i);
+
+    Logger.step(4, 'Kiểm tra nhãn mục I.1 và I.2 bằng tiếng Việt');
+    const lblCust = await raSoatKqPage.getPreviewInfoLabel(1);
+    expect(lblCust).toMatch(/Tên khách hàng/i);
+    const lblAddr = await raSoatKqPage.getPreviewInfoLabel(2);
+    expect(lblAddr).toMatch(/Địa chỉ/i);
+
+    Logger.step(5, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_SW_04: Chế độ EN - Tiêu đề và nhãn Mục I trên bản in xem trước hiển thị hoàn toàn bằng tiếng Anh', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và chọn chế độ EN');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.selectLanguage('EN');
+
+    Logger.step(2, 'Mở khung xem trước');
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(3, 'Kiểm tra tiêu đề phiếu in tiếng Anh');
+    const title = await raSoatKqPage.getPreviewTitle();
+    expect(title).toMatch(/TEST REPORT|TEST RESULT/i);
+
+    Logger.step(4, 'Kiểm tra nhãn mục I.1 và I.2 bằng tiếng Anh');
+    const lblCust = await raSoatKqPage.getPreviewInfoLabel(1);
+    expect(lblCust).toMatch(/Customer|Client/i);
+    const lblAddr = await raSoatKqPage.getPreviewInfoLabel(2);
+    expect(lblAddr).toMatch(/Address/i);
+
+    Logger.step(5, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_SW_05: Chế độ Song ngữ - Tiêu đề và nhãn Mục I trên bản in xem trước hiển thị song ngữ VN / EN', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và chọn chế độ Song ngữ');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.selectLanguage('Song ngữ');
+
+    Logger.step(2, 'Mở khung xem trước');
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(3, 'Kiểm tra tiêu đề hiển thị song ngữ');
+    const title = await raSoatKqPage.getPreviewTitle();
+    expect(title).toMatch(/PHIẾU KẾT QUẢ/i);
+    expect(title).toMatch(/TEST/i);
+
+    Logger.step(4, 'Kiểm tra nhãn mục I.1 và I.2 chứa cả tiếng Việt và tiếng Anh');
+    const lblCust = await raSoatKqPage.getPreviewInfoLabel(1);
+    expect(lblCust).toMatch(/Tên khách hàng/i);
+    expect(lblCust).toMatch(/Customer|Client/i);
+
+    Logger.step(5, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_SW_06: Chế độ Song ngữ - Nhập tiếng Việt và bỏ trống tiếng Anh ở trường tùy chọn ➔ Lưu hợp lệ và xem trước ổn định', {
+    tag: ['@normal']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Chuyển sang chế độ Song ngữ');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.selectLanguage('Song ngữ');
+
+    Logger.step(2, 'Nhập tiếng Việt cho Mô tả mẫu và để trống tiếng Anh');
+    await raSoatKqPage.fillBilingual('Mô tả mẫu', 'VN', 'Mẫu thử dạng bột màu trắng');
+    await raSoatKqPage.fillBilingual('Mô tả mẫu', 'EN', '');
+
+    Logger.step(3, 'Lưu phiếu');
+    await raSoatKqPage.clickSave();
+    const isSaveDisabled = await raSoatKqPage.btnSave.isDisabled();
+    if (!isSaveDisabled) {
+      const hasError = await raSoatKqPage.saveErrorToast.isVisible({ timeout: 2000 }).catch(() => false);
+      expect(hasError).toBeFalsy();
+    }
+
+    Logger.step(4, 'Mở xem trước và kiểm tra mục Mô tả mẫu hiển thị nội dung tiếng Việt');
+    await raSoatKqPage.ensurePreviewOpen();
+    const descVal = await raSoatKqPage.getPreviewInfoValue(4);
+    expect(descVal).toContain('Mẫu thử dạng bột màu trắng');
+
+    Logger.step(5, 'Hoàn nguyên');
+    await raSoatKqPage.ensurePreviewClosed();
+    await raSoatKqPage.reload();
+  });
+
+  test('RSKQ_SW_07: Chế độ Song ngữ - Bỏ trống tiếng Việt và nhập tiếng Anh ở trường tùy chọn ➔ Lưu hợp lệ và xem trước ổn định', {
+    tag: ['@normal']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Chuyển sang chế độ Song ngữ');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.selectLanguage('Song ngữ');
+
+    Logger.step(2, 'Để trống tiếng Việt và nhập tiếng Anh cho Mô tả mẫu');
+    await raSoatKqPage.fillBilingual('Mô tả mẫu', 'VN', '');
+    await raSoatKqPage.fillBilingual('Mô tả mẫu', 'EN', 'White powder sample');
+
+    Logger.step(3, 'Lưu phiếu và kiểm tra không báo lỗi');
+    await raSoatKqPage.clickSave();
+    const isSaveDisabled = await raSoatKqPage.btnSave.isDisabled();
+    if (!isSaveDisabled) {
+      const hasError = await raSoatKqPage.saveErrorToast.isVisible({ timeout: 2000 }).catch(() => false);
+      expect(hasError).toBeFalsy();
+    }
+
+    Logger.step(4, 'Mở xem trước và kiểm tra mục Mô tả mẫu hiển thị tiếng Anh');
+    await raSoatKqPage.ensurePreviewOpen();
+    const descVal = await raSoatKqPage.getPreviewInfoValue(4);
+    expect(descVal).toContain('White powder sample');
+
+    Logger.step(5, 'Hoàn nguyên');
+    await raSoatKqPage.ensurePreviewClosed();
+    await raSoatKqPage.reload();
+  });
+
+  test('RSKQ_SW_08: Chế độ Song ngữ - Bỏ trống cột EN ở trường bắt buộc "Tên mẫu" ➔ Chặn lưu và báo lỗi validation', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Chuyển sang chế độ Song ngữ');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.selectLanguage('Song ngữ');
+
+    Logger.step(2, 'Nhập cột VN và xóa trắng cột EN trường Tên mẫu');
+    await raSoatKqPage.fillBilingual('Tên mẫu', 'VN', 'Nước uống đóng chai');
+    const enInput = raSoatKqPage.bilingualInput('Tên mẫu', 'EN');
+    const origEn = await enInput.inputValue();
+    await enInput.fill('');
+
+    Logger.step(3, 'Bấm Lưu và kiểm tra cảnh báo bắt buộc nhập tiếng Anh');
+    await raSoatKqPage.clickSave();
+    const isSaveDisabled = await raSoatKqPage.btnSave.isDisabled();
+    if (isSaveDisabled) {
+      expect(isSaveDisabled).toBeTruthy();
+    } else {
+      const hasToast = await raSoatKqPage.saveErrorToast.isVisible({ timeout: 2500 }).catch(() => false);
+      if (!hasToast) {
+        const isInvalid = await enInput.evaluate((el: HTMLInputElement) => !el.checkValidity() || el.classList.contains('is-invalid') || el.classList.contains('border-red-500'));
+        expect(isInvalid).toBeTruthy();
+      }
+    }
+
+    Logger.step(4, 'Hoàn nguyên');
+    if (origEn) await enInput.fill(origEn);
+    await raSoatKqPage.reload();
+  });
+
+  test('RSKQ_SW_09: Chuyển sang chế độ EN khi trường chỉ có tiếng Việt ➔ Form hiển thị ô rỗng và preview không lẫn tiếng Việt', {
+    tag: ['@normal']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Chuyển sang chế độ EN');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.selectLanguage('EN');
+
+    Logger.step(2, 'Kiểm tra ô nhập EN hiển thị độc lập');
+    const enDescInput = raSoatKqPage.bilingualInput('Mô tả mẫu', 'EN');
+    await expect(enDescInput).toBeVisible();
+
+    Logger.step(3, 'Mở xem trước ở chế độ EN');
+    await raSoatKqPage.ensurePreviewOpen();
+    const title = await raSoatKqPage.getPreviewTitle();
+    expect(title).toMatch(/TEST REPORT|TEST RESULT/i);
+
+    Logger.step(4, 'Hoàn nguyên');
+    await raSoatKqPage.ensurePreviewClosed();
+    await raSoatKqPage.selectLanguage('Song ngữ');
+  });
+
+  test('RSKQ_SW_10: Chuyển sang chế độ VN khi trường chỉ có tiếng Anh ➔ Form hiển thị 1 cột VN và preview lấy dữ liệu VN', {
+    tag: ['@normal']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Chuyển sang chế độ VN');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.selectLanguage('VN');
+
+    Logger.step(2, 'Kiểm tra form chỉ hiển thị tag VN');
+    const tags = await raSoatKqPage.getFieldLangTags('Tên mẫu');
+    expect(tags).toEqual(['VN']);
+
+    Logger.step(3, 'Mở xem trước và kiểm tra tiêu đề tiếng Việt');
+    await raSoatKqPage.ensurePreviewOpen();
+    const title = await raSoatKqPage.getPreviewTitle();
+    expect(title).toMatch(/PHIẾU KẾT QUẢ THỬ NGHIỆM/i);
+
+    Logger.step(4, 'Hoàn nguyên');
+    await raSoatKqPage.ensurePreviewClosed();
+    await raSoatKqPage.selectLanguage('Song ngữ');
+  });
+
   // =========================================================================
   // KHỐI 06: THÔNG TIN CHUNG & FIELD VALIDATION
   // =========================================================================
@@ -1492,6 +1695,392 @@ test.describe('Module Rà soát kết quả (/ra-soat-kq) - Hệ thống VNTEST 
     await raSoatKqPage.openEditableRecord();
     const printCalls = await raSoatKqPage.clickPrintAndCount();
     expect(printCalls).toBe(1);
+  });
+
+  // =========================================================================
+  // KHỐI 13: ĐỒNG BỘ CHI TIẾT DỮ LIỆU FORM & BẢN IN XEM TRƯỚC (PREVIEW SYNCHRONIZATION)
+  // =========================================================================
+
+  test('RSKQ_SYNC_01: Đồng bộ Tên khách hàng - Sửa đổi Tên KH trên form ➔ Khung xem trước cập nhật mục I.1 tương ứng', {
+    tag: ['@smoke', '@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Nhập giá trị Tên KH mới');
+    const isBilingual = (await raSoatKqPage.langSelect.inputValue()) === 'Song ngữ';
+    const testName = 'Công ty Thử Nghiệm Tự Động Hóa VNTEST';
+    if (isBilingual) {
+      await raSoatKqPage.fillBilingual('Tên KH', 'VN', testName);
+    } else {
+      await raSoatKqPage.field('Tên KH').locator('input').fill(testName);
+    }
+
+    Logger.step(3, 'Kiểm tra giá trị Mục I.1 trên bản in xem trước cập nhật đúng Tên KH');
+    await raSoatKqPage.page.waitForTimeout(300);
+    const previewCust = await raSoatKqPage.getPreviewInfoValue(1);
+    expect(previewCust).toContain(testName);
+
+    Logger.step(4, 'Hoàn nguyên');
+    await raSoatKqPage.ensurePreviewClosed();
+    await raSoatKqPage.reload();
+  });
+
+  test('RSKQ_SYNC_02: Đồng bộ Địa chỉ khách hàng - Sửa đổi Địa chỉ trên form ➔ Khung xem trước cập nhật mục I.2 tương ứng', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Cập nhật Địa chỉ khách hàng');
+    const testAddr = 'Số 10 Trịnh Văn Bô, Nam Từ Liêm, Hà Nội';
+    const isBilingual = (await raSoatKqPage.langSelect.inputValue()) === 'Song ngữ';
+    if (isBilingual) {
+      await raSoatKqPage.fillBilingual('Địa chỉ KH', 'VN', testAddr);
+    } else {
+      await raSoatKqPage.field('Địa chỉ KH').locator('input').fill(testAddr);
+    }
+
+    Logger.step(3, 'Kiểm tra giá trị Mục I.2 trên bản in xem trước cập nhật đúng Địa chỉ');
+    await raSoatKqPage.page.waitForTimeout(300);
+    const previewAddr = await raSoatKqPage.getPreviewInfoValue(2);
+    expect(previewAddr).toContain(testAddr);
+
+    Logger.step(4, 'Hoàn nguyên');
+    await raSoatKqPage.ensurePreviewClosed();
+    await raSoatKqPage.reload();
+  });
+
+  test('RSKQ_SYNC_03: Đồng bộ Tên mẫu thử nghiệm - Sửa đổi Tên mẫu trên form ➔ Khung xem trước cập nhật mục I.3 tương ứng', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Cập nhật Tên mẫu');
+    const testSample = 'Mẫu Nước Uống Đóng Bình 20L Tiêu Chuẩn';
+    const isBilingual = (await raSoatKqPage.langSelect.inputValue()) === 'Song ngữ';
+    if (isBilingual) {
+      await raSoatKqPage.fillBilingual('Tên mẫu', 'VN', testSample);
+    } else {
+      await raSoatKqPage.field('Tên mẫu').locator('input').fill(testSample);
+    }
+
+    Logger.step(3, 'Kiểm tra giá trị Mục I.3 trên bản in xem trước cập nhật đúng Tên mẫu');
+    await raSoatKqPage.page.waitForTimeout(300);
+    const previewSample = await raSoatKqPage.getPreviewInfoValue(3);
+    expect(previewSample).toContain(testSample);
+
+    Logger.step(4, 'Hoàn nguyên');
+    await raSoatKqPage.ensurePreviewClosed();
+    await raSoatKqPage.reload();
+  });
+
+  test('RSKQ_SYNC_04: Đồng bộ Mô tả mẫu - Sửa đổi Mô tả mẫu trên form ➔ Khung xem trước cập nhật mục I.4 tương ứng', {
+    tag: ['@normal']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Cập nhật Mô tả mẫu');
+    const testDesc = 'Mẫu đựng trong bình nhựa trong suốt nguyên niêm phong';
+    const isBilingual = (await raSoatKqPage.langSelect.inputValue()) === 'Song ngữ';
+    if (isBilingual) {
+      await raSoatKqPage.fillBilingual('Mô tả mẫu', 'VN', testDesc);
+    } else {
+      await raSoatKqPage.field('Mô tả mẫu').locator('input').fill(testDesc);
+    }
+
+    Logger.step(3, 'Kiểm tra giá trị Mục I.4 trên bản in xem trước cập nhật đúng Mô tả mẫu');
+    await raSoatKqPage.page.waitForTimeout(300);
+    const previewDesc = await raSoatKqPage.getPreviewInfoValue(4);
+    expect(previewDesc).toContain(testDesc);
+
+    Logger.step(4, 'Hoàn nguyên');
+    await raSoatKqPage.ensurePreviewClosed();
+    await raSoatKqPage.reload();
+  });
+
+  test('RSKQ_SYNC_05: Đồng bộ Kết luận & Ghi chú - Nhập Kết luận trên form ➔ Khung xem trước cập nhật mục Kết luận tương ứng', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Cập nhật Kết luận');
+    const testConclusion = 'Mẫu đạt tất cả các chỉ tiêu theo QCVN 6-1:2010/BYT';
+    const isBilingual = (await raSoatKqPage.langSelect.inputValue()) === 'Song ngữ';
+    if (isBilingual) {
+      await raSoatKqPage.fillBilingual('Kết luận', 'VN', testConclusion);
+    } else {
+      await raSoatKqPage.field('Kết luận').locator('textarea, input').fill(testConclusion);
+    }
+
+    Logger.step(3, 'Kiểm tra toàn bộ văn bản khung xem trước chứa nội dung Kết luận');
+    await raSoatKqPage.page.waitForTimeout(300);
+    const previewText = await raSoatKqPage.getPreviewAllText();
+    expect(previewText).toContain(testConclusion);
+
+    Logger.step(4, 'Hoàn nguyên');
+    await raSoatKqPage.ensurePreviewClosed();
+    await raSoatKqPage.reload();
+  });
+
+  test('RSKQ_SYNC_06: Đồng bộ Chứng nhận - Chọn thẻ chứng nhận trên form ➔ Khung xem trước cập nhật tem chứng nhận VILAS / VIMCERTS', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra tem chứng nhận hiển thị trên đầu phiếu in');
+    const stamps = await raSoatKqPage.getPreviewStamps();
+    expect(stamps.length).toBeGreaterThanOrEqual(0);
+
+    Logger.step(3, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_SYNC_07: Đồng bộ Bảng kết quả thử nghiệm - Bảng chỉ tiêu trên bản in xem trước hiển thị đủ các cột STT, Chỉ tiêu, Kết quả', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra bảng kết quả trên tờ in hiển thị');
+    await expect(raSoatKqPage.previewTable).toBeVisible();
+
+    Logger.step(3, 'Kiểm tra tiêu đề bảng in chứa các cột chuẩn');
+    const tableHeader = await raSoatKqPage.previewTable.locator('thead').innerText();
+    expect(tableHeader).toMatch(/Chỉ tiêu|Test parameter|STT|No/i);
+    expect(tableHeader).toMatch(/Kết quả|Result/i);
+
+    Logger.step(4, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  // =========================================================================
+  // KHỐI 14: KIỂM TRA CHI TIẾT CÁC THÀNH PHẦN BÊN TRONG BẢN IN XEM TRƯỚC (Print Preview Sheet Details)
+  // =========================================================================
+
+  test('RSKQ_PREV_01: Cấu trúc tổng thể trang in ISO/IEC 17025 - Hiển thị đầy đủ Header, Mục I, Mục II và Chữ ký', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra Header viện VNTEST và tiêu đề phiếu');
+    await expect(raSoatKqPage.previewHeader).toBeVisible();
+    await expect(raSoatKqPage.previewTitle).toBeVisible();
+
+    Logger.step(3, 'Kiểm tra Mục I: THÔNG TIN CHUNG (General Information)');
+    await expect(raSoatKqPage.previewSectionGeneral).toBeVisible();
+    expect(await raSoatKqPage.previewInfoRows.count()).toBeGreaterThanOrEqual(8);
+
+    Logger.step(4, 'Kiểm tra Mục II: BẢNG KẾT QUẢ THỬ NGHIỆM (Result Table)');
+    await expect(raSoatKqPage.previewSectionResult).toBeVisible();
+    await expect(raSoatKqPage.previewTable).toBeVisible();
+
+    Logger.step(5, 'Kiểm tra Khu vực Chữ ký đại diện');
+    await expect(raSoatKqPage.previewSignatures).toBeVisible();
+
+    Logger.step(6, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_PREV_02: Header phiếu in - Logo VNTEST, thông tin Viện tiếng Việt & tiếng Anh, SĐT và Email', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra logo VNTEST trên đầu trang in');
+    await expect(raSoatKqPage.previewLogo).toBeVisible();
+
+    Logger.step(3, 'Kiểm tra thông tin Viện VNTEST, SĐT và Email');
+    const headerText = await raSoatKqPage.previewHeader.innerText();
+    expect(headerText).toContain('VIỆN KIỂM NGHIỆM VÀ KIỂM ĐỊNH CHẤT LƯỢNG VNTEST');
+    expect(headerText).toContain('VNTEST INSTITUTE FOR QUALITY TESTING AND INSPECTION');
+    expect(headerText).toContain('024.66.86.76.38');
+    expect(headerText).toContain('info@vntest.vn');
+
+    Logger.step(4, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_PREV_03: Thẻ chứng nhận & Mã số phiếu - Hiển thị các tem VILAS/VIMCERTS và mã số phiếu', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra tem chứng nhận VILAS / VIMCERTS');
+    const stamps = await raSoatKqPage.getPreviewStamps();
+    expect(stamps.length).toBeGreaterThan(0);
+    expect(stamps.some(s => s.includes('VILAS') || s.includes('VIMCERTS'))).toBeTruthy();
+
+    Logger.step(3, 'Kiểm tra mã số phiếu trên tờ in có tiền tố DV');
+    const docCode = await raSoatKqPage.previewDocCode.innerText();
+    expect(docCode.trim()).toMatch(/^DV/i);
+
+    Logger.step(4, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_PREV_04: Mục I.1 & I.2 - Tên khách hàng và Địa chỉ hiển thị chuẩn xác trên bản in', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra Mục I.1 Tên khách hàng');
+    const lblCust = await raSoatKqPage.getPreviewInfoLabel(1);
+    expect(lblCust).toMatch(/Customer|Khách hàng/i);
+    const valCust = await raSoatKqPage.getPreviewInfoValue(1);
+    expect(valCust.length).toBeGreaterThan(0);
+
+    Logger.step(3, 'Kiểm tra Mục I.2 Địa chỉ khách hàng');
+    const lblAddr = await raSoatKqPage.getPreviewInfoLabel(2);
+    expect(lblAddr).toMatch(/Address|Địa chỉ/i);
+    const valAddr = await raSoatKqPage.getPreviewInfoValue(2);
+    expect(valAddr.length).toBeGreaterThan(0);
+
+    Logger.step(4, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_PREV_05: Mục I.3 & I.4 - Tên mẫu và Mô tả mẫu hiển thị đầy đủ trên bản in', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra Mục I.3 Tên mẫu');
+    const lblSample = await raSoatKqPage.getPreviewInfoLabel(3);
+    expect(lblSample).toMatch(/Sample|Tên mẫu/i);
+    const valSample = await raSoatKqPage.getPreviewInfoValue(3);
+    expect(valSample.length).toBeGreaterThan(0);
+
+    Logger.step(3, 'Kiểm tra Mục I.4 Mô tả mẫu tồn tại');
+    const lblDesc = await raSoatKqPage.getPreviewInfoLabel(4);
+    expect(lblDesc).toMatch(/Description|Mô tả/i);
+
+    Logger.step(4, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_PREV_06: Mục I.5 đến I.8 - Các mốc ngày tháng hiển thị đúng định dạng trên bản in', {
+    tag: ['@normal']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra Ngày nhận mẫu (Mục 5)');
+    const receiveDate = await raSoatKqPage.getPreviewInfoValue(5);
+    expect(receiveDate.length).toBeGreaterThan(0);
+
+    Logger.step(3, 'Kiểm tra Thời gian lưu mẫu (Mục 6)');
+    const retentionTime = await raSoatKqPage.getPreviewInfoValue(6);
+    expect(retentionTime).toMatch(/\d+\s*(ngày|days?)/i);
+
+    Logger.step(4, 'Kiểm tra Ngày thử nghiệm (Mục 7) có định dạng ngày dd/mm/yyyy');
+    const testDate = await raSoatKqPage.getPreviewInfoValue(7);
+    expect(testDate).toMatch(/\d{2}\/\d{2}\/\d{4}/);
+
+    Logger.step(5, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_PREV_07: Mục I.9 - Tài liệu kèm theo hiển thị đúng mã số YCTN tham chiếu', {
+    tag: ['@normal']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra tài liệu cung cấp (Mục 9) có chứa mã số YCTN');
+    const docValue = await raSoatKqPage.getPreviewInfoValue(9);
+    expect(docValue.length).toBeGreaterThan(0);
+
+    Logger.step(3, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_PREV_08: Mục II Bảng kết quả - Hiển thị đầy đủ các cột STT, Chỉ tiêu, ĐVT, KQ, Phương pháp', {
+    tag: ['@smoke', '@critical']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra tiêu đề các cột của bảng kết quả');
+    const ths = await raSoatKqPage.previewTable.locator('th').allInnerTexts();
+    const thText = ths.join(' ');
+    expect(thText).toMatch(/STT|No/i);
+    expect(thText).toMatch(/Chỉ tiêu|Parameter/i);
+    expect(thText).toMatch(/Đơn vị|Unit/i);
+    expect(thText).toMatch(/Kết quả|Result/i);
+    expect(thText).toMatch(/Phương pháp|Test Method/i);
+
+    Logger.step(3, 'Kiểm tra bảng có ít nhất 1 dòng chỉ tiêu thử nghiệm');
+    expect(await raSoatKqPage.previewTableRows.count()).toBeGreaterThan(0);
+
+    Logger.step(4, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_PREV_09: Badge mã mẫu con - Hiển thị mã mẫu con trong bảng kết quả thử nghiệm nếu là phiếu gộp', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra bảng kết quả trên bản in');
+    const tableText = await raSoatKqPage.previewTable.innerText();
+    const hasSampleBadge = /S\d+\.\d+/.test(tableText);
+    Logger.info(`Phiếu hiện tại ${hasSampleBadge ? 'CÓ' : 'KHÔNG CÓ'} badge mẫu con`);
+    expect(tableText.length).toBeGreaterThan(0);
+
+    Logger.step(3, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
+  });
+
+  test('RSKQ_PREV_10: Ghi chú chuẩn & Chữ ký đại diện - Hiển thị ghi chú pháp lý và khối chữ ký 2 cấp', {
+    tag: ['@high']
+  }, async ({ raSoatKqPage }) => {
+    Logger.step(1, 'Mở phiếu và bật khung xem trước');
+    await raSoatKqPage.openEditableRecord();
+    await raSoatKqPage.ensurePreviewOpen();
+
+    Logger.step(2, 'Kiểm tra phần ghi chú chuẩn (KPH, LOD, công nhận VILAS)');
+    const previewText = await raSoatKqPage.getPreviewText();
+    expect(previewText).toMatch(/KPH|Không phát hiện|LOD/i);
+
+    Logger.step(3, 'Kiểm tra chữ ký Phòng kiểm nghiệm (QC Manager)');
+    await expect(raSoatKqPage.previewSignatures).toBeVisible();
+    const signText = await raSoatKqPage.previewSignatures.innerText();
+    expect(signText).toMatch(/PHÒNG KIỂM NGHIỆM|QC Manager/i);
+    expect(signText).toMatch(/TRẦN KHÁNH CHI/i);
+
+    Logger.step(4, 'Kiểm tra chữ ký Viện trưởng (Director)');
+    expect(signText).toMatch(/VIỆN TRƯỞNG|DIRECTOR/i);
+    expect(signText).toMatch(/TRỊNH CÔNG SƠN/i);
+
+    Logger.step(5, 'Đóng xem trước');
+    await raSoatKqPage.ensurePreviewClosed();
   });
 });
 

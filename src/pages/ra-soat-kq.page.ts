@@ -25,6 +25,18 @@ export class RaSoatKqPage extends BasePage {
   readonly btnPrint: Locator;
   readonly previewToggle: Locator;
   readonly previewPage: Locator;
+  readonly previewLogo: Locator;
+  readonly previewDocCode: Locator;
+  readonly previewTitle: Locator;
+  readonly previewHeader: Locator;
+  readonly previewSectionGeneral: Locator;
+  readonly previewInfoRows: Locator;
+  readonly previewSectionResult: Locator;
+  readonly previewStamps: Locator;
+  readonly previewTable: Locator;
+  readonly previewTableRows: Locator;
+  readonly previewNotes: Locator;
+  readonly previewSignatures: Locator;
 
   // ============================================================
   // 2. Bộ lọc, tìm kiếm & danh sách bên trái
@@ -109,6 +121,18 @@ export class RaSoatKqPage extends BasePage {
     this.btnPrint = page.locator('button[title="In PKQ đang chọn"]').first();
     this.previewToggle = page.locator('.xpkq-toggle').first();
     this.previewPage = page.locator('.pkq-pp-page:visible').first();
+    this.previewLogo = page.locator('.pkq-pp-page .pkq-pp-logo').first();
+    this.previewDocCode = page.locator('.pkq-pp-page .pkq-pp-vilas strong, .pkq-pp-page .pkq-pp-code').first();
+    this.previewTitle = page.locator('.pkq-pp-page .pkq-pp-title').first();
+    this.previewHeader = page.locator('.pkq-pp-page .pkq-pp-header').first();
+    this.previewSectionGeneral = page.locator('.pkq-pp-page .pkq-pp-sec').filter({ hasText: /GENERAL|THÔNG TIN CHUNG/i }).first();
+    this.previewInfoRows = page.locator('.pkq-pp-page .pkq-pp-info-row');
+    this.previewSectionResult = page.locator('.pkq-pp-page .pkq-pp-sec').filter({ hasText: /RESULT|KẾT QUẢ/i }).first();
+    this.previewStamps = page.locator('.pkq-pp-page .pkq-pp-stamp');
+    this.previewTable = page.locator('.pkq-pp-page .pkq-pp-tbl').first();
+    this.previewTableRows = this.previewTable.locator('tbody tr');
+    this.previewNotes = page.locator('.pkq-pp-page .pkq-pp-note, .pkq-pp-page [class*="note"]').first();
+    this.previewSignatures = page.locator('.pkq-pp-page .pkq-pp-signs').first();
 
     // 2. Bộ lọc & danh sách
     this.searchInput = page.locator('input[placeholder*="Tìm: mã YCTN"]').first();
@@ -492,6 +516,57 @@ export class RaSoatKqPage extends BasePage {
     Logger.info('Nhấn nút "Print"');
     await this.btnPrint.click();
     return await this.page.evaluate(() => (window as any).__printCalls as number);
+  }
+
+  /** Đảm bảo khung xem trước được bật */
+  async ensurePreviewOpen(): Promise<void> {
+    if (!(await this.isPreviewOn())) {
+      Logger.info('Mở khung xem trước');
+      await this.togglePreview();
+      await this.page.waitForTimeout(300);
+    }
+  }
+
+  /** Đảm bảo khung xem trước được tắt */
+  async ensurePreviewClosed(): Promise<void> {
+    if (await this.isPreviewOn()) {
+      Logger.info('Đóng khung xem trước');
+      await this.togglePreview();
+      await this.page.waitForTimeout(300);
+    }
+  }
+
+  /** Lấy tiêu đề của phiếu in xem trước */
+  async getPreviewTitle(): Promise<string> {
+    return (await this.previewTitle.innerText()).trim();
+  }
+
+  /** Lấy nhãn của một dòng thông tin Mục I (theo số thứ tự 1..9) */
+  async getPreviewInfoLabel(num: number): Promise<string> {
+    const row = this.previewInfoRows.filter({ has: this.page.locator('.num', { hasText: `${num}.` }) }).first();
+    return (await row.locator('.lbl').innerText()).trim();
+  }
+
+  /** Lấy giá trị của một dòng thông tin Mục I (theo số thứ tự 1..9) */
+  async getPreviewInfoValue(num: number): Promise<string> {
+    const row = this.previewInfoRows.filter({ has: this.page.locator('.num', { hasText: `${num}.` }) }).first();
+    return (await row.locator('.val').innerText()).trim();
+  }
+
+  /** Lấy danh sách các chứng nhận hiển thị trên phiếu in */
+  async getPreviewStamps(): Promise<string[]> {
+    const texts = await this.previewStamps.allInnerTexts();
+    return texts.map(t => t.trim());
+  }
+
+  /** Lấy toàn bộ văn bản của khung xem trước */
+  async getPreviewAllText(): Promise<string> {
+    return (await this.previewPage.innerText()).trim();
+  }
+
+  /** Lấy toàn bộ văn bản của khung xem trước (alias) */
+  async getPreviewText(): Promise<string> {
+    return await this.getPreviewAllText();
   }
 
   // ============================================================
