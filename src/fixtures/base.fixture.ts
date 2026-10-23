@@ -15,6 +15,7 @@ import { HoSoTnPage } from '../pages/ho-so-tn.page';
 import { TruongBpKtraPage } from '../pages/truong-bp-ktra.page';
 import { RaSoatKqPage } from '../pages/ra-soat-kq.page';
 import { DuyetPkqPage } from '../pages/duyet-pkq.page';
+import { DinhKemScanPage } from '../pages/dinh-kem-scan.page';
 
 // Định nghĩa kiểu dữ liệu cho custom fixtures
 type CustomFixtures = {
@@ -34,6 +35,7 @@ type CustomFixtures = {
   truongBpKtraPage: TruongBpKtraPage;
   raSoatKqPage: RaSoatKqPage;
   duyetPkqPage: DuyetPkqPage;
+  dinhKemScanPage: DinhKemScanPage;
 };
 
 /**
@@ -103,6 +105,10 @@ export const test = base.extend<CustomFixtures>({
   duyetPkqPage: async ({ page }, use) => {
     const duyetPkqPage = new DuyetPkqPage(page);
     await use(duyetPkqPage);
+  },
+  dinhKemScanPage: async ({ page }, use) => {
+    const dinhKemScanPage = new DinhKemScanPage(page);
+    await use(dinhKemScanPage);
   },
 });
 

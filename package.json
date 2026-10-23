@@ -47,6 +47,10 @@
     "test:duyet-pkq:critical": "playwright test src/tests/duyet-pkq --grep \"@critical\"",
     "test:duyet-pkq:high": "playwright test src/tests/duyet-pkq --grep \"@high\"",
     "test:duyet-pkq:smoke": "playwright test src/tests/duyet-pkq --grep \"@smoke\"",
+    "test:dinh-kem-scan": "playwright test src/tests/dinh-kem-scan",
+    "test:dinh-kem-scan:critical": "playwright test src/tests/dinh-kem-scan --grep \"@critical\"",
+    "test:dinh-kem-scan:high": "playwright test src/tests/dinh-kem-scan --grep \"@high\"",
+    "test:dinh-kem-scan:smoke": "playwright test src/tests/dinh-kem-scan --grep \"@smoke\"",
     "report": "playwright show-report",
     "allure:generate": "allure generate ./allure-results --clean -o ./allure-report",
     "allure:open": "allure open ./allure-report"
