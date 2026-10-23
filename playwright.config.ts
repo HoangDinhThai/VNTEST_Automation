@@ -25,8 +25,9 @@ export default defineConfig({
     baseURL: process.env.BASE_URL || 'https://vntest-lims.pirago.work',
     // Rule: Viewport bắt buộc 1920x1080 cho desktop UI testing
     viewport: { width: 1920, height: 1080 },
-    // Rule: Mở browser thật (headed) khi debug local, headless trên CI hoặc khi HEADLESS=true
-    headless: process.env.HEADLESS !== undefined ? process.env.HEADLESS === 'true' : !!process.env.CI,
+    // Mặc định chạy headless (ẩn dưới nền) để tránh cướp focus màn hình khi làm việc.
+    // Khi muốn mở giao diện browser xem trực tiếp: thêm cờ --headed hoặc chạy `npm run test:headed`
+    headless: process.env.HEADED === 'true' || process.env.HEADLESS === 'false' ? false : true,
     launchOptions: {
       args: ['--ignore-certificate-errors'],
     },
