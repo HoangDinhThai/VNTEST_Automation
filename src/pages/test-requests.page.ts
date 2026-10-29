@@ -530,8 +530,13 @@ export class TestRequestsPage extends BasePage {
    */
   async openContractDropdown(): Promise<void> {
     Logger.info('Mở danh sách dropdown "Số hợp đồng"');
+    // Chờ cho dropdown tải xong dữ liệu từ API (loại bỏ class is-loading)
+    await this.section1.locator('label:has-text("Số hợp đồng") .select-search:not(.is-loading)').first().waitFor({ state: 'attached', timeout: 15000 }).catch(() => {});
+    await this.page.waitForTimeout(300);
     await this.contractTrigger.click();
     await this.page.waitForTimeout(400);
+    // Chờ menu options hiển thị
+    await this.page.locator('.select-search-menu').waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
   }
 
   /**
@@ -540,10 +545,12 @@ export class TestRequestsPage extends BasePage {
   async selectContractByIndex(optionIndex = 0): Promise<string> {
     Logger.info(`Chọn hợp đồng tại vị trí ${optionIndex + 1} trong danh sách`);
     await this.openContractDropdown();
-    const option = this.page.locator('.select-search-menu .select-search-option').nth(optionIndex);
+    const options = this.page.locator('.select-search-menu .select-search-option');
+    await options.first().waitFor({ state: 'visible', timeout: 10000 });
+    const option = options.nth(optionIndex);
     const text = (await option.innerText().catch(() => '')) || '';
     await option.click();
-    await this.page.waitForTimeout(400);
+    await this.page.waitForTimeout(600);
     return text.trim();
   }
 
@@ -567,13 +574,13 @@ export class TestRequestsPage extends BasePage {
    */
   async clearContract(): Promise<void> {
     Logger.info('Nhấn nút [×] để xóa hợp đồng đã chọn');
-    const clearBtn = this.section1.locator('label:has-text("Số hợp đồng") .select-search-clear, label:has-text("Số hợp đồng") button:has-text("×"), label:has-text("Số hợp đồng") [aria-label="Clear"]');
+    const clearBtn = this.section1.locator('label:has-text("Số hợp đồng") .select-search-clear, label:has-text("Số hợp đồng") [aria-label="Xóa"], label:has-text("Số hợp đồng") button:has-text("×"), label:has-text("Số hợp đồng") .clear-btn');
     if (await clearBtn.isVisible().catch(() => false)) {
       await clearBtn.click();
     } else {
       await this.contractClearButton.click();
     }
-    await this.page.waitForTimeout(400);
+    await this.page.waitForTimeout(500);
   }
 
   /**
@@ -581,13 +588,13 @@ export class TestRequestsPage extends BasePage {
    */
   async clearCustomer(): Promise<void> {
     Logger.info('Nhấn nút [×] để xóa khách hàng đã chọn');
-    const clearBtn = this.section1.locator('label:has-text("Mã khách hàng") .select-search-clear, label:has-text("Mã khách hàng") button:has-text("×"), label:has-text("Mã khách hàng") [aria-label="Clear"]');
+    const clearBtn = this.section1.locator('label:has-text("Mã khách hàng") .select-search-clear, label:has-text("Mã khách hàng") [aria-label="Xóa"], label:has-text("Mã khách hàng") button:has-text("×"), label:has-text("Mã khách hàng") .clear-btn');
     if (await clearBtn.isVisible().catch(() => false)) {
       await clearBtn.click();
     } else {
       await this.customerCodeClearButton.click();
     }
-    await this.page.waitForTimeout(400);
+    await this.page.waitForTimeout(500);
   }
 
   /**
@@ -624,10 +631,14 @@ export class TestRequestsPage extends BasePage {
    */
   async selectCustomerByIndex(optionIndex = 0): Promise<void> {
     Logger.info(`Chọn khách hàng tại vị trí ${optionIndex + 1} trong danh sách`);
+    await this.section1.locator('label:has-text("Mã khách hàng") .select-search:not(.is-loading)').first().waitFor({ state: 'attached', timeout: 15000 }).catch(() => {});
+    await this.page.waitForTimeout(300);
     await this.customerCodeTrigger.click();
     await this.page.waitForTimeout(400);
-    await this.page.locator('.select-search-menu .select-search-option').nth(optionIndex).click();
-    await this.page.waitForTimeout(400);
+    const options = this.page.locator('.select-search-menu .select-search-option');
+    await options.first().waitFor({ state: 'visible', timeout: 10000 });
+    await options.nth(optionIndex).click();
+    await this.page.waitForTimeout(500);
   }
 
   /**

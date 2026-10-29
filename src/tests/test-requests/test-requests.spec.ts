@@ -844,10 +844,10 @@ test.describe('Module Quản lý Báo giá & Yêu cầu thử nghiệm (/yeu-cau
     const searchInput = testRequestsPage.page.locator('.select-search-menu input, .select-search-search input');
     if (await searchInput.isVisible().catch(() => false)) {
       await searchInput.fill('HĐ');
-      await testRequestsPage.page.waitForTimeout(300);
+      await testRequestsPage.page.waitForTimeout(500);
 
       Logger.step('Verify', 'Danh sách gợi ý chỉ hiển thị các hợp đồng khớp với từ khóa tìm kiếm');
-      const filteredOptions = testRequestsPage.page.locator('.select-search-menu .select-search-option');
+      const filteredOptions = testRequestsPage.page.locator('.select-search-menu .select-search-option, [role="listbox"] [role="option"]');
       const filteredCount = await filteredOptions.count();
       expect(filteredCount).toBeGreaterThan(0);
       for (let i = 0; i < Math.min(filteredCount, 3); i++) {
@@ -1103,6 +1103,21 @@ test.describe('Module Quản lý Báo giá & Yêu cầu thử nghiệm (/yeu-cau
     await testRequestsPage.openCreateForm();
     await testRequestsPage.selectContractByIndex(0);
     await testRequestsPage.selectReceivedDateToday();
+
+    // Điền bổ sung Người liên hệ & SĐT nếu hợp đồng chưa có sẵn
+    const contactName = await testRequestsPage.contactNameInput.inputValue();
+    if (!contactName.trim()) {
+      await testRequestsPage.contactNameInput.fill('Nguyễn Văn Kiểm Thử');
+    }
+    const contactPhone = await testRequestsPage.contactPhoneInput.inputValue();
+    if (!contactPhone.trim()) {
+      await testRequestsPage.contactPhoneInput.fill('0987654321');
+    }
+    // Chuẩn hóa Email nếu dữ liệu mẫu chứa ký tự có dấu không hợp lệ
+    const emailVal = await testRequestsPage.contactEmailInput.inputValue();
+    if (emailVal && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal) || /[à-ỹÀ-Ỹ]/.test(emailVal))) {
+      await testRequestsPage.contactEmailInput.fill('contact.test@example.com');
+    }
 
     await testRequestsPage.addSampleMatrixByIndex(0);
     await testRequestsPage.sampleArticles.first().locator('input[placeholder="Tên mẫu"]').fill(sampleName);
