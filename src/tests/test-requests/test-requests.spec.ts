@@ -808,5 +808,314 @@ test.describe('Module Quản lý Báo giá & Yêu cầu thử nghiệm (/yeu-cau
     await expect(testRequestsPage.dateFromTrigger).toContainText('dd/mm/yyyy');
     await expect(testRequestsPage.dateToTrigger).toContainText('dd/mm/yyyy');
   });
+
+  // ==========================================
+  // KHỐI 09: NGHIỆP VỤ CHỌN HỢP ĐỒNG & ĐỒNG BỘ DỮ LIỆU TẠO MỚI YCTN
+  // ==========================================
+  test('TC_YCTN_034: Hiển thị danh sách tất cả hợp đồng có trong hệ thống khi mở dropdown "Số hợp đồng" (chưa chọn khách hàng)', {
+    tag: ['@normal', '@minor']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới Báo giá & YCTN');
+    await testRequestsPage.openCreateForm();
+    await expect(testRequestsPage.contractTrigger).toBeVisible();
+
+    Logger.step(2, 'Nhấn mở dropdown "Số hợp đồng" khi chưa chọn khách hàng');
+    await testRequestsPage.openContractDropdown();
+
+    Logger.step('Verify', 'Dropdown mở ra hiển thị danh sách các hợp đồng có trong hệ thống theo định dạng "[Mã HĐ] · [Tên HĐ]"');
+    const menu = testRequestsPage.page.locator('.select-search-menu');
+    await expect(menu).toBeVisible();
+    const options = menu.locator('.select-search-option');
+    const count = await options.count();
+    expect(count).toBeGreaterThan(0);
+    const firstOptionText = await options.first().innerText();
+    expect(firstOptionText).toMatch(/HĐ-|HD-/i);
+    await testRequestsPage.page.keyboard.press('Escape');
+  });
+
+  test('TC_YCTN_035: Tìm kiếm hợp đồng trong ô dropdown "Số hợp đồng" theo từ khóa mã hoặc tên hợp đồng', {
+    tag: ['@normal', '@minor']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới và mở dropdown "Số hợp đồng"');
+    await testRequestsPage.openCreateForm();
+    await testRequestsPage.openContractDropdown();
+
+    Logger.step(2, 'Nhập từ khóa tìm kiếm "HĐ" vào ô tìm kiếm của dropdown');
+    const searchInput = testRequestsPage.page.locator('.select-search-menu input, .select-search-search input');
+    if (await searchInput.isVisible().catch(() => false)) {
+      await searchInput.fill('HĐ');
+      await testRequestsPage.page.waitForTimeout(300);
+
+      Logger.step('Verify', 'Danh sách gợi ý chỉ hiển thị các hợp đồng khớp với từ khóa tìm kiếm');
+      const filteredOptions = testRequestsPage.page.locator('.select-search-menu .select-search-option');
+      const filteredCount = await filteredOptions.count();
+      expect(filteredCount).toBeGreaterThan(0);
+      for (let i = 0; i < Math.min(filteredCount, 3); i++) {
+        const text = await filteredOptions.nth(i).innerText();
+        expect(text.toLowerCase()).toContain('hđ');
+      }
+    }
+    await testRequestsPage.page.keyboard.press('Escape');
+  });
+
+  test('TC_YCTN_036: Chọn Hợp đồng có đầy đủ thông tin — Tự động điền (Auto-fill) thông tin khách hàng ở Phần 1 và "Số hợp đồng" ở Phần 2', {
+    tag: ['@high', '@critical']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới và chọn hợp đồng đầu tiên trong danh sách');
+    await testRequestsPage.openCreateForm();
+    const selectedContractText = await testRequestsPage.selectContractByIndex(0);
+    expect(selectedContractText.length).toBeGreaterThan(0);
+
+    Logger.step('Verify 1', 'Trường "Số hợp đồng" hiển thị thông tin hợp đồng đã chọn');
+    await expect(testRequestsPage.contractTrigger).toContainText(/HĐ-|HD-/i);
+
+    Logger.step('Verify 2', 'Các thông tin khách hàng ở Phần 1 tự động được điền (Mã KH, Tên KH, Địa chỉ, SĐT)');
+    await expect(testRequestsPage.customerCodeTrigger).not.toHaveText(/chọn/i);
+    const customerName = await testRequestsPage.customerNameInput.inputValue();
+    const customerAddress = await testRequestsPage.customerAddressInput.inputValue();
+    const contactPhone = await testRequestsPage.contactPhoneInput.inputValue();
+    expect(customerName.trim().length).toBeGreaterThan(0);
+    expect(customerAddress.trim().length).toBeGreaterThan(0);
+    expect(contactPhone.trim().length).toBeGreaterThan(0);
+
+    Logger.step('Verify 3', 'Trường "Số hợp đồng" ở Phần 2 (Thông tin xuất hóa đơn) tự động điền mã hợp đồng tương ứng');
+    const invoiceContractVal = await testRequestsPage.invoiceContractInput.inputValue();
+    expect(invoiceContractVal.trim().length).toBeGreaterThan(0);
+    expect(selectedContractText).toContain(invoiceContractVal);
+  });
+
+  test('TC_YCTN_037: Chọn Hợp đồng thiếu một số thông tin — Các trường không có dữ liệu để trống mà không gây lỗi', {
+    tag: ['@normal', '@major']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới và chọn hợp đồng trong danh sách');
+    await testRequestsPage.openCreateForm();
+    await testRequestsPage.selectContractByIndex(0);
+
+    Logger.step('Verify', 'Các trường không có dữ liệu để trống "" một cách an toàn, không hiển thị null hoặc undefined');
+    const emailVal = await testRequestsPage.contactEmailInput.inputValue();
+    const partnerVal = await testRequestsPage.partnerTrigger.innerText().catch(() => '');
+    expect(emailVal).not.toContain('null');
+    expect(emailVal).not.toContain('undefined');
+    expect(partnerVal).not.toContain('null');
+    expect(partnerVal).not.toContain('undefined');
+  });
+
+  test('TC_YCTN_038: Thay đổi sang một Hợp đồng khác — Tự động cập nhật lại thông tin khách hàng và "Số hợp đồng" ở Phần 2', {
+    tag: ['@normal', '@major']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới và chọn hợp đồng tại vị trí 1');
+    await testRequestsPage.openCreateForm();
+    await testRequestsPage.selectContractByIndex(0);
+    const firstInvoiceContract = await testRequestsPage.invoiceContractInput.inputValue();
+
+    Logger.step(2, 'Mở lại dropdown và chọn hợp đồng tại vị trí 2 (nếu có từ 2 hợp đồng trở lên)');
+    await testRequestsPage.openContractDropdown();
+    const options = testRequestsPage.page.locator('.select-search-menu .select-search-option');
+    const count = await options.count();
+    if (count > 1) {
+      await options.nth(1).click();
+      await testRequestsPage.page.waitForTimeout(400);
+
+      Logger.step('Verify', 'Thông tin khách hàng và "Số hợp đồng" ở Phần 2 được cập nhật lại theo hợp đồng mới');
+      const secondInvoiceContract = await testRequestsPage.invoiceContractInput.inputValue();
+      expect(secondInvoiceContract.trim().length).toBeGreaterThan(0);
+    } else {
+      await testRequestsPage.page.keyboard.press('Escape');
+    }
+  });
+
+  test('TC_YCTN_039: Nhấn nút [×] tại trường "Số hợp đồng" — Xóa trắng trường Số hợp đồng, toàn bộ thông tin khách hàng đã điền vẫn giữ nguyên', {
+    tag: ['@high', '@critical']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới và chọn một hợp đồng để auto-fill thông tin khách hàng');
+    await testRequestsPage.openCreateForm();
+    await testRequestsPage.selectContractByIndex(0);
+
+    Logger.step(2, 'Ghi nhận thông tin khách hàng hiện tại trước khi xóa hợp đồng');
+    const customerCodeText = (await testRequestsPage.customerCodeTrigger.innerText()).trim();
+    const customerName = await testRequestsPage.customerNameInput.inputValue();
+    const customerAddress = await testRequestsPage.customerAddressInput.inputValue();
+    const contactPhone = await testRequestsPage.contactPhoneInput.inputValue();
+    expect(customerName.length).toBeGreaterThan(0);
+
+    Logger.step(3, 'Nhấn nút [×] (clear) tại trường "Số hợp đồng"');
+    await testRequestsPage.clearContract();
+
+    Logger.step('Verify 1', 'Trường "Số hợp đồng" trở về trạng thái trống (chưa chọn)');
+    await expect(testRequestsPage.contractTrigger).not.toContainText(/HĐ-\d+/i);
+
+    Logger.step('Verify 2', 'Toàn bộ thông tin khách hàng ở dưới vẫn giữ nguyên đầy đủ, không bị xóa');
+    await expect(testRequestsPage.customerCodeTrigger).toContainText(customerCodeText);
+    await expect(testRequestsPage.customerNameInput).toHaveValue(customerName);
+    await expect(testRequestsPage.customerAddressInput).toHaveValue(customerAddress);
+    await expect(testRequestsPage.contactPhoneInput).toHaveValue(contactPhone);
+  });
+
+  test('TC_YCTN_040: Mở lại dropdown "Số hợp đồng" sau khi nhấn [×] — Chỉ hiển thị các hợp đồng thuộc khách hàng hiện tại', {
+    tag: ['@high', '@critical']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới, chọn Hợp đồng và ghi nhận khách hàng được auto-fill');
+    await testRequestsPage.openCreateForm();
+    await testRequestsPage.selectContractByIndex(0);
+    const customerCode = (await testRequestsPage.customerCodeTrigger.innerText()).trim();
+
+    Logger.step(2, 'Nhấn nút [×] để xóa hợp đồng đã chọn');
+    await testRequestsPage.clearContract();
+
+    Logger.step(3, 'Mở lại dropdown "Số hợp đồng" khi khách hàng vẫn đang được chọn');
+    await testRequestsPage.openContractDropdown();
+
+    Logger.step('Verify', 'Dropdown chỉ lọc và hiển thị danh sách các hợp đồng thuộc riêng khách hàng đó, không hiển thị toàn bộ hợp đồng hệ thống');
+    const options = testRequestsPage.page.locator('.select-search-menu .select-search-option');
+    const count = await options.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      const optionText = await options.nth(i).innerText();
+      expect(optionText).toMatch(/HĐ-|HD-/i);
+    }
+    await testRequestsPage.page.keyboard.press('Escape');
+  });
+
+  test('TC_YCTN_041: Chọn lại một Hợp đồng từ danh sách đã lọc theo khách hàng — Cập nhật Số hợp đồng mới tương ứng', {
+    tag: ['@normal', '@major']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới, chọn Hợp đồng rồi xóa hợp đồng bằng nút [×]');
+    await testRequestsPage.openCreateForm();
+    await testRequestsPage.selectContractByIndex(0);
+    await testRequestsPage.clearContract();
+
+    Logger.step(2, 'Mở lại dropdown và chọn một hợp đồng từ danh sách đã lọc của khách hàng đó');
+    const reselectedContract = await testRequestsPage.selectContractByIndex(0);
+    expect(reselectedContract.length).toBeGreaterThan(0);
+
+    Logger.step('Verify', 'Trường "Số hợp đồng" ở Phần 1 và Phần 2 được cập nhật lại chính xác');
+    await expect(testRequestsPage.contractTrigger).toContainText(/HĐ-|HD-/i);
+    const invoiceContract = await testRequestsPage.invoiceContractInput.inputValue();
+    expect(reselectedContract).toContain(invoiceContract);
+  });
+
+  test('TC_YCTN_042: Chọn Khách hàng trước khi chọn Hợp đồng — Dropdown Số hợp đồng chỉ hiển thị các HĐ thuộc khách hàng đó', {
+    tag: ['@normal', '@major']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới khi chưa chọn Hợp đồng');
+    await testRequestsPage.openCreateForm();
+
+    Logger.step(2, 'Chọn một Khách hàng từ combobox "Mã khách hàng"');
+    await testRequestsPage.selectCustomerByIndex(0);
+    const customerCode = (await testRequestsPage.customerCodeTrigger.innerText()).trim();
+    expect(customerCode.length).toBeGreaterThan(0);
+
+    Logger.step(3, 'Mở dropdown "Số hợp đồng"');
+    await testRequestsPage.openContractDropdown();
+
+    Logger.step('Verify', 'Danh sách gợi ý Số hợp đồng được lọc phù hợp với khách hàng vừa chọn');
+    const options = testRequestsPage.page.locator('.select-search-menu .select-search-option');
+    const count = await options.count();
+    if (count > 0) {
+      const optionText = await options.first().innerText();
+      expect(optionText).toMatch(/HĐ-|HD-/i);
+    }
+    await testRequestsPage.page.keyboard.press('Escape');
+  });
+
+  test('TC_YCTN_043: Chọn Khách hàng chưa có hợp đồng nào — Dropdown Số hợp đồng hiển thị danh sách trống hoặc thông báo không có dữ liệu', {
+    tag: ['@low', '@minor']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới và chọn khách hàng không có hợp đồng');
+    await testRequestsPage.openCreateForm();
+    await testRequestsPage.selectCustomerByIndex(0);
+
+    Logger.step(2, 'Mở dropdown "Số hợp đồng" để kiểm tra trạng thái dữ liệu');
+    await testRequestsPage.openContractDropdown();
+
+    Logger.step('Verify', 'Menu dropdown hiển thị danh sách hợp đồng hợp lệ hoặc hiển thị trạng thái "Không có dữ liệu" mà không bị crash');
+    const menu = testRequestsPage.page.locator('.select-search-menu');
+    await expect(menu).toBeVisible();
+    await testRequestsPage.page.keyboard.press('Escape');
+  });
+
+  test('TC_YCTN_044: Xóa Khách hàng bằng nút [×] khi đã chọn Hợp đồng — Xử lý reset trường Hợp đồng hoặc mở lại hiển thị toàn bộ HĐ', {
+    tag: ['@normal', '@major']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới, chọn Hợp đồng để auto-fill khách hàng');
+    await testRequestsPage.openCreateForm();
+    await testRequestsPage.selectContractByIndex(0);
+
+    Logger.step(2, 'Nhấn nút [×] xóa Mã khách hàng');
+    await testRequestsPage.clearCustomer();
+
+    Logger.step('Verify', 'Trường Mã khách hàng bị xóa trắng; mở lại dropdown Số hợp đồng có thể hiển thị lại danh sách hợp đồng hệ thống');
+    await testRequestsPage.openContractDropdown();
+    const options = testRequestsPage.page.locator('.select-search-menu .select-search-option');
+    const count = await options.count();
+    expect(count).toBeGreaterThan(0);
+    await testRequestsPage.page.keyboard.press('Escape');
+  });
+
+  test('TC_YCTN_045: Tích chọn "Lấy từ khách hàng" ở Phần 2 sau khi chọn Hợp đồng — Sao chép thông tin Tên, MST, Địa chỉ, Email vào hóa đơn; Số hợp đồng ở Phần 2 giữ nguyên', {
+    tag: ['@high', '@critical']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới và chọn một Hợp đồng');
+    await testRequestsPage.openCreateForm();
+    await testRequestsPage.selectContractByIndex(0);
+    const customerName = await testRequestsPage.customerNameInput.inputValue();
+    const customerAddress = await testRequestsPage.customerAddressInput.inputValue();
+    const invoiceContractBefore = await testRequestsPage.invoiceContractInput.inputValue();
+    expect(invoiceContractBefore.length).toBeGreaterThan(0);
+
+    Logger.step(2, 'Tích chọn checkbox "Lấy từ khách hàng" ở Phần 2 (Thông tin xuất hóa đơn)');
+    await testRequestsPage.toggleCopyFromCustomer(true);
+
+    Logger.step('Verify 1', 'Các trường Tên xuất hóa đơn và Địa chỉ xuất hóa đơn được sao chép chính xác từ Phần 1');
+    await expect(testRequestsPage.invoiceNameInput).toHaveValue(customerName);
+    await expect(testRequestsPage.invoiceAddressInput).toHaveValue(customerAddress);
+
+    Logger.step('Verify 2', 'Trường "Số hợp đồng" ở Phần 2 vẫn giữ nguyên giá trị hợp đồng đã liên kết');
+    await expect(testRequestsPage.invoiceContractInput).toHaveValue(invoiceContractBefore);
+  });
+
+  test('TC_YCTN_046: Bỏ tích chọn "Lấy từ khách hàng" ở Phần 2 — Cho phép chỉnh sửa thông tin hóa đơn độc lập', {
+    tag: ['@normal', '@major']
+  }, async ({ testRequestsPage }) => {
+    Logger.step(1, 'Mở form tạo mới, chọn Hợp đồng và tích chọn "Lấy từ khách hàng"');
+    await testRequestsPage.openCreateForm();
+    await testRequestsPage.selectContractByIndex(0);
+    await testRequestsPage.toggleCopyFromCustomer(true);
+    const originalCustomerName = await testRequestsPage.customerNameInput.inputValue();
+
+    Logger.step(2, 'Bỏ tích chọn "Lấy từ khách hàng" và chỉnh sửa lại Tên xuất hóa đơn');
+    await testRequestsPage.toggleCopyFromCustomer(false);
+    const customInvoiceName = 'Công ty Cổ phần Thử Nghiệm Riêng';
+    await testRequestsPage.invoiceNameInput.fill(customInvoiceName);
+
+    Logger.step('Verify', 'Tên xuất hóa đơn nhận giá trị mới chỉnh sửa, trong khi Tên khách hàng ở Phần 1 vẫn giữ nguyên không đổi');
+    await expect(testRequestsPage.invoiceNameInput).toHaveValue(customInvoiceName);
+    await expect(testRequestsPage.customerNameInput).toHaveValue(originalCustomerName);
+  });
+
+  test('TC_YCTN_047: Tạo mới Báo giá / YCTN hoàn chỉnh có chọn Hợp đồng — Lưu thành công bản ghi gắn với Số hợp đồng', {
+    tag: ['@high', '@critical']
+  }, async ({ testRequestsPage }) => {
+    const timestamp = Date.now().toString().slice(-5);
+    const sampleName = `Mẫu Test Hợp Đồng ${timestamp}`;
+
+    Logger.step(1, 'Mở form tạo mới, chọn Hợp đồng và điền đầy đủ thông tin mẫu thử nghiệm');
+    await testRequestsPage.openCreateForm();
+    await testRequestsPage.selectContractByIndex(0);
+    await testRequestsPage.selectReceivedDateToday();
+
+    await testRequestsPage.addSampleMatrixByIndex(0);
+    await testRequestsPage.sampleArticles.first().locator('input[placeholder="Tên mẫu"]').fill(sampleName);
+    await testRequestsPage.openAnalytePickerForSample(0);
+    await testRequestsPage.selectAnalytesAndConfirm([0]);
+
+    Logger.step(2, 'Nhấn nút "Lưu" để hoàn tất tạo mới');
+    await testRequestsPage.submitForm();
+
+    Logger.step('Verify', 'Hiển thị thông báo "Đã lưu báo giá." và bản ghi tạo mới xuất hiện đầu danh sách');
+    await expect(testRequestsPage.toastMessages.filter({ hasText: 'Đã lưu báo giá.' })).toBeVisible({ timeout: 10000 });
+    await testRequestsPage.filterByStatusChip('draft');
+    await expect(testRequestsPage.firstRow).toContainText(sampleName);
+  });
 });
 

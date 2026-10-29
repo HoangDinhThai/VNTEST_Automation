@@ -75,7 +75,11 @@ export class TestRequestsPage extends BasePage {
   readonly receivedDateTrigger: Locator;
   readonly dueDateInput: Locator;
   readonly contractTrigger: Locator;
+  readonly contractClearButton: Locator;
+  readonly contractValue: Locator;
   readonly customerCodeTrigger: Locator;
+  readonly customerCodeClearButton: Locator;
+  readonly customerCodeValue: Locator;
   readonly customerSourceSelect: Locator;
   readonly partnerTrigger: Locator;
   readonly customerNameInput: Locator;
@@ -228,7 +232,11 @@ export class TestRequestsPage extends BasePage {
     this.receivedDateTrigger = this.section1.locator('label:has-text("Ngày nhận") .custom-date-input__trigger');
     this.dueDateInput = this.section1.locator('label:has-text("Ngày hẹn trả") input');
     this.contractTrigger = this.section1.locator('label:has-text("Số hợp đồng") .select-search-trigger');
+    this.contractClearButton = this.section1.locator('label:has-text("Số hợp đồng") .select-search-clear, label:has-text("Số hợp đồng") button[aria-label="Clear"], label:has-text("Số hợp đồng") .clear-btn');
+    this.contractValue = this.section1.locator('label:has-text("Số hợp đồng") .select-search-value, label:has-text("Số hợp đồng") .select-search-trigger');
     this.customerCodeTrigger = this.section1.locator('label:has-text("Mã khách hàng") .select-search-trigger');
+    this.customerCodeClearButton = this.section1.locator('label:has-text("Mã khách hàng") .select-search-clear, label:has-text("Mã khách hàng") button[aria-label="Clear"], label:has-text("Mã khách hàng") .clear-btn');
+    this.customerCodeValue = this.section1.locator('label:has-text("Mã khách hàng") .select-search-value, label:has-text("Mã khách hàng") .select-search-trigger');
     this.customerSourceSelect = this.section1.locator('label:has-text("Nguồn khách hàng") select');
     this.partnerTrigger = this.section1.locator('label:has-text("Mã đối tác") .select-search-trigger');
     this.customerNameInput = this.section1.locator('label:has-text("Tên khách hàng") input');
@@ -515,6 +523,100 @@ export class TestRequestsPage extends BasePage {
     Logger.info('Nhấn nút "Lưu" trên form');
     await this.saveFormButton.click();
     await this.page.waitForTimeout(800);
+  }
+
+  /**
+   * Mở danh sách dropdown "Số hợp đồng"
+   */
+  async openContractDropdown(): Promise<void> {
+    Logger.info('Mở danh sách dropdown "Số hợp đồng"');
+    await this.contractTrigger.click();
+    await this.page.waitForTimeout(400);
+  }
+
+  /**
+   * Chọn hợp đồng từ combobox "Số hợp đồng" theo vị trí index (0-based)
+   */
+  async selectContractByIndex(optionIndex = 0): Promise<string> {
+    Logger.info(`Chọn hợp đồng tại vị trí ${optionIndex + 1} trong danh sách`);
+    await this.openContractDropdown();
+    const option = this.page.locator('.select-search-menu .select-search-option').nth(optionIndex);
+    const text = (await option.innerText().catch(() => '')) || '';
+    await option.click();
+    await this.page.waitForTimeout(400);
+    return text.trim();
+  }
+
+  /**
+   * Chọn hợp đồng theo mã hoặc tên hợp đồng
+   */
+  async selectContractByText(text: string): Promise<void> {
+    Logger.info(`Chọn hợp đồng chứa từ khóa "${text}"`);
+    await this.openContractDropdown();
+    const searchInput = this.page.locator('.select-search-menu input, .select-search-search input');
+    if (await searchInput.isVisible().catch(() => false)) {
+      await searchInput.fill(text);
+      await this.page.waitForTimeout(300);
+    }
+    await this.page.locator('.select-search-menu .select-search-option').filter({ hasText: text }).first().click();
+    await this.page.waitForTimeout(400);
+  }
+
+  /**
+   * Nhấn nút xóa [×] tại ô Số hợp đồng
+   */
+  async clearContract(): Promise<void> {
+    Logger.info('Nhấn nút [×] để xóa hợp đồng đã chọn');
+    const clearBtn = this.section1.locator('label:has-text("Số hợp đồng") .select-search-clear, label:has-text("Số hợp đồng") button:has-text("×"), label:has-text("Số hợp đồng") [aria-label="Clear"]');
+    if (await clearBtn.isVisible().catch(() => false)) {
+      await clearBtn.click();
+    } else {
+      await this.contractClearButton.click();
+    }
+    await this.page.waitForTimeout(400);
+  }
+
+  /**
+   * Nhấn nút xóa [×] tại ô Mã khách hàng
+   */
+  async clearCustomer(): Promise<void> {
+    Logger.info('Nhấn nút [×] để xóa khách hàng đã chọn');
+    const clearBtn = this.section1.locator('label:has-text("Mã khách hàng") .select-search-clear, label:has-text("Mã khách hàng") button:has-text("×"), label:has-text("Mã khách hàng") [aria-label="Clear"]');
+    if (await clearBtn.isVisible().catch(() => false)) {
+      await clearBtn.click();
+    } else {
+      await this.customerCodeClearButton.click();
+    }
+    await this.page.waitForTimeout(400);
+  }
+
+  /**
+   * Lấy danh sách text của tất cả các options đang hiển thị trong menu dropdown "Số hợp đồng"
+   */
+  async getContractDropdownOptionTexts(): Promise<string[]> {
+    await this.openContractDropdown();
+    const options = this.page.locator('.select-search-menu .select-search-option');
+    const count = await options.count();
+    const texts: string[] = [];
+    for (let i = 0; i < count; i++) {
+      texts.push((await options.nth(i).innerText()).trim());
+    }
+    // Nhấn Escape để đóng dropdown
+    await this.page.keyboard.press('Escape').catch(() => {});
+    await this.page.waitForTimeout(200);
+    return texts;
+  }
+
+  /**
+   * Bật/tắt checkbox "Lấy từ khách hàng" ở Phần 2
+   */
+  async toggleCopyFromCustomer(check = true): Promise<void> {
+    Logger.info(`${check ? 'Tích chọn' : 'Bỏ tích'} "Lấy từ khách hàng"`);
+    const isChecked = await this.copyFromCustomerCheckbox.isChecked();
+    if (isChecked !== check) {
+      await this.copyFromCustomerCheckbox.click();
+      await this.page.waitForTimeout(400);
+    }
   }
 
   /**

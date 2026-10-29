@@ -51,6 +51,10 @@
     "test:dinh-kem-scan:critical": "playwright test src/tests/dinh-kem-scan --grep \"@critical\"",
     "test:dinh-kem-scan:high": "playwright test src/tests/dinh-kem-scan --grep \"@high\"",
     "test:dinh-kem-scan:smoke": "playwright test src/tests/dinh-kem-scan --grep \"@smoke\"",
+    "test:test-requests": "playwright test src/tests/test-requests",
+    "test:test-requests:critical": "playwright test src/tests/test-requests --grep \"@critical\"",
+    "test:test-requests:high": "playwright test src/tests/test-requests --grep \"@high\"",
+    "test:test-requests:contract": "playwright test src/tests/test-requests --grep \"TC_YCTN_03[4-9]|TC_YCTN_04[0-7]\"",
     "report": "playwright show-report",
     "allure:generate": "allure generate ./allure-results --clean -o ./allure-report",
     "allure:open": "allure open ./allure-report"
