@@ -356,6 +356,12 @@ export class ContractsPage extends BasePage {
     await this.page.waitForTimeout(600);
   }
 
+  async openDetailPanelOfRow(index: number): Promise<void> {
+    Logger.info(`Mở panel xem chi tiết của dòng thứ ${index + 1}`);
+    await this.rows.nth(index).locator('.px-view-button').first().click();
+    await this.page.waitForTimeout(600);
+  }
+
   async closeDetailPanel(): Promise<void> {
     Logger.info('Đóng panel xem chi tiết');
     if (await this.detailHeaderCloseBtn.isVisible()) {
@@ -364,6 +370,28 @@ export class ContractsPage extends BasePage {
       await this.detailBtnClose.click();
     }
     await this.page.waitForTimeout(500);
+  }
+
+  async selectDateFromDay(day: number): Promise<void> {
+    Logger.info(`Chọn ngày ${day} cho mốc TỪ ngày`);
+    await this.dateFromTrigger.click();
+    await this.page.waitForTimeout(400);
+    const dayBtn = this.page.locator('.date-calendar button.date-calendar__cell').filter({ hasText: new RegExp(`^${day}$`) }).first();
+    if (await dayBtn.isVisible()) {
+      await dayBtn.click();
+      await this.page.waitForTimeout(500);
+    }
+  }
+
+  async selectDateToDay(day: number): Promise<void> {
+    Logger.info(`Chọn ngày ${day} cho mốc ĐẾN ngày`);
+    await this.dateToTrigger.click();
+    await this.page.waitForTimeout(400);
+    const dayBtn = this.page.locator('.date-calendar button.date-calendar__cell').filter({ hasText: new RegExp(`^${day}$`) }).first();
+    if (await dayBtn.isVisible()) {
+      await dayBtn.click();
+      await this.page.waitForTimeout(500);
+    }
   }
 }
 
