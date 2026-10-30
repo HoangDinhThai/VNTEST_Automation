@@ -6,7 +6,7 @@ Tất cả các tài liệu đều được định dạng chuẩn theo mẫu đ
 
 ---
 
-## 📑 Danh Mục Màn Hình & Trạng Thái Hoàn Thành (17 Phân Hệ — 645 Test Cases)
+## 📑 Danh Mục Màn Hình & Trạng Thái Hoàn Thành (17 Phân Hệ — 692 Test Cases)
 
 | STT | Mã Module | Tên Màn Hình / Chức Năng | File Tài Liệu | Số Test Cases | Trạng Thái |
 | :---: | :--- | :--- | :--- | :---: | :---: |
@@ -21,13 +21,13 @@ Tất cả các tài liệu đều được định dạng chuẩn theo mẫu đ
 | 09 | **DUYET_PKQ** | Duyệt Phiếu Kết Quả | [09_duyet_pkq.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/09_duyet_pkq.md) | 48 | ✅ Đã hoàn thành |
 | 10 | **DK_SCAN** | Đính kèm Scan & Tra cứu kết quả | [10_dinh_kem_scan.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/10_dinh_kem_scan.md) | 57 | ✅ Đã hoàn thành |
 | 11 | **CUSTOMERS** | Quản lý Khách hàng | [11_customers.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/11_customers.md) | 41 | ✅ Đã hoàn thành |
-| 12 | **LEADS** | Quản lý Lead / Cơ hội | [12_leads.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/12_leads.md) | 17 | ✅ Đã hoàn thành |
+| 12 | **LEADS** | Quản lý Lead / Cơ hội | [12_leads.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/12_leads.md) | 64 | ✅ Đã hoàn thành |
 | 13 | **PARTNERS** | Quản lý Đối tác Doanh nghiệp | [13_partners.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/13_partners.md) | 18 | ✅ Đã hoàn thành |
 | 14 | **COLLAB** | Quản lý Cộng tác viên Cá nhân | [14_collaborators.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/14_collaborators.md) | 18 | ✅ Đã hoàn thành |
-| 15 | **PERSONNEL** | Quản lý Nhân sự & Phân quyền | [15_personnel.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/15_personnel.md) | 27 | ✅ Đã hoàn thành |
+| 15 | **PERSONNEL** | Quản lý Nhân sự & Phân quyền | [15_personnel.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/15_personnel.md) | 34 | ✅ Đã hoàn thành |
 | 16 | **FORMULA** | Quản lý Công thức tính toán | [16_formula.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/16_formula.md) | 40 | ✅ Đã hoàn thành |
 | 17 | **CRITERIA** | Quản lý Chỉ tiêu lẻ & Nền mẫu | [17_single_criteria.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/17_single_criteria.md) | 17 | ✅ Đã hoàn thành |
-| **TỔNG** | **17 MODULES** | **TOÀN BỘ HỆ THỐNG VNTEST LIMS** | **17 FILE SPECS** | **645** | **✅ 100% HOÀN THÀNH** |
+| **TỔNG** | **17 MODULES** | **TOÀN BỘ HỆ THỐNG VNTEST LIMS** | **17 FILE SPECS** | **692** | **✅ 100% HOÀN THÀNH** |
 
 ---
 

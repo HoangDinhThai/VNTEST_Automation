@@ -12,7 +12,7 @@
 | **Đối tượng sử dụng** | Quản trị viên hệ thống (Admin), Trưởng phòng Nhân sự, Ban Giám đốc |
 | **Trạng thái tài liệu** | `Approved / Ready for Development & Testing` |
 | **Cơ sở dữ liệu liên kết** | `personnel`, `departments`, `roles`, `permissions`, `users`, `audit_logs` |
-| **Test Script Playwright** | [`src/tests/personnel/personnel.spec.ts`](file:///home/thai.hoang.dinh/VNTEST_Automation/src/tests/personnel/personnel.spec.ts) (27 Test Cases) |
+| **Test Script Playwright** | [`src/tests/personnel/personnel.spec.ts`](file:///home/thai.hoang.dinh/VNTEST_Automation/src/tests/personnel/personnel.spec.ts) (34 Test Cases) |
 | **Page Object Model** | [`src/pages/personnel.page.ts`](file:///home/thai.hoang.dinh/VNTEST_Automation/src/pages/personnel.page.ts) |
 | **Dữ liệu kiểm thử** | [`test-data/users.json`](file:///home/thai.hoang.dinh/VNTEST_Automation/test-data/users.json), `test-data/personnel.json` |
 
@@ -26,7 +26,7 @@
 5. [5. Đặc tả chi tiết trường dữ liệu (Field Specifications Matrix)](#5-đặc-tả-chi-tiết-trường-dữ-liệu-field-specifications-matrix)
 6. [6. Ma trận nút bấm & Tương tác giao diện (Action Buttons Matrix)](#6-ma-trận-nút-bấm--tương-tác-giao-diện-action-buttons-matrix)
 7. [7. Quy tắc nghiệp vụ & Luồng xử lý lỗi (Business Rules & Error Handling)](#7-quy-tắc-nghiệp-vụ--luồng-xử-lý-lỗi-business-rules--error-handling)
-8. [8. Kế hoạch kiểm thử & Ma trận Test Cases Automation (27 Test Cases)](#8-kế-hoạch-kiểm-thử--ma-trận-test-cases-automation-27-test-cases)
+8. [8. Kế hoạch kiểm thử & Ma trận Test Cases Automation (34 Test Cases)](#8-kế-hoạch-kiểm-thử--ma-trận-test-cases-automation-34-test-cases)
 
 ---
 
@@ -107,12 +107,17 @@ flowchart TD
 
 ### 3.1. Ma trận phân quyền truy cập (RBAC Matrix)
 
-| Vai trò người dùng (Role) | Xem danh sách | Thêm nhân sự | Sửa hồ sơ | Đổi chức vụ | Đặt lại mật khẩu | Xóa nhân sự |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Quản trị viên (Admin)** | Toàn quyền | Toàn quyền | Toàn quyền | Bắt buộc nhập lý do | Toàn quyền | Toàn quyền |
-| **Ban Giám đốc** | Toàn quyền | Thêm mới | Sửa hồ sơ | Phê duyệt đổi | Yêu cầu reset | Phê duyệt xóa |
-| **Trưởng phòng / Quản lý**| Xem nhân sự phòng | Đề xuất thêm | Xem hồ sơ | Đề xuất đổi | Không có quyền | Không có quyền |
-| **Nhân viên thông thường** | Xem danh bạ nội bộ | Bị chặn | Bị chặn | Bị chặn | Bị chặn | Bị chặn |
+| Vai trò người dùng (Role) | Tuyến đường `/nhan-su` | Xem danh sách | Thêm nhân sự | Sửa hồ sơ | Đổi chức vụ | Đặt lại mật khẩu | Xóa nhân sự |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Quản trị viên (Admin)** | Cho phép truy cập | Toàn quyền | Toàn quyền | Toàn quyền | Bắt buộc nhập lý do | Toàn quyền | Toàn quyền |
+| **Quản lý Nhân sự (HR Manager)** | Cho phép truy cập | Toàn quyền | Thêm mới | Sửa hồ sơ | Phê duyệt đổi | Toàn quyền | Toàn quyền |
+| **Kỹ thuật viên phòng LAB (KNV)** | **Bị chặn (403/Redirect)** | Không có quyền | Bị chặn | Bị chặn | Bị chặn | Bị chặn | Bị chặn |
+| **Nhân viên kinh doanh (Sale)** | **Bị chặn (403/Redirect)** | Không có quyền | Bị chặn | Bị chặn | Bị chặn | Bị chặn | Bị chặn |
+| **Khách vãng lai (Chưa đăng nhập)**| **Chuyển hướng `/dang-nhap`** | Bị chặn | Bị chặn | Bị chặn | Bị chặn | Bị chặn | Bị chặn |
+
+> [!NOTE] Trạng thái triển khai Phân quyền (RBAC)
+> Hiện tại hệ thống LIMS đang trong giai đoạn phát triển và **chưa kích hoạt cơ chế phân quyền (RBAC)** cho tuyến đường `/nhan-su`.
+> Bộ kịch bản kiểm thử phân quyền (`TC_NS_RBAC_01` đến `TC_NS_RBAC_04`) đã được biên soạn và scaffold sẵn trong file test tự động, tạm thời ở trạng thái comment và sẽ được bật lại ngay khi module phân quyền được release.
 
 ### 3.2. Tiền điều kiện & Ràng buộc chuyển trạng thái
 * **Quy tắc Trạng thái Nút Thao tác:**
@@ -219,22 +224,24 @@ flowchart TD
 
 ---
 
-## 8. KẾ HOẠCH KIỂM THỬ & MA TRẬN TEST CASES AUTOMATION (27 TEST CASES)
+## 8. KẾ HOẠCH KIỂM THỬ & MA TRẬN TEST CASES AUTOMATION (34 ACTIVE / 41 TOTAL TEST CASES)
 
 ### 8.1. Thống kê độ phủ kiểm thử theo Phân nhóm chức năng
 
 | Nhóm chức năng (Feature Scope) | Số kịch bản (TCs) | Tỷ lệ độ phủ | Trạng thái Automation |
 | :--- | :---: | :---: | :---: |
-| **Khối 01: Bố cục, Điều hướng, Toolbar & Quản lý cột** | 09 | 34.6% | `Passed 100%` |
-| **Khối 02: Thêm mới Nhân sự & Validation sao đỏ** | 05 | 19.2% | `Passed 100%` |
-| **Khối 03: Chỉnh sửa Nhân sự & Ràng buộc Lý do chức vụ** | 04 | 15.4% | `Passed 100%` |
-| **Khối 04: Đặt lại Mật khẩu & Xóa Nhân sự** | 04 | 15.4% | `Passed 100%` |
-| **Khối 05: Xem Chi tiết, Tìm kiếm & Lọc Chip Phòng ban** | 04 | 15.4% | `Passed 100%` |
-| **TỔNG CỘNG ĐỘ PHỦ KIỂM THỬ** | **27 Test Cases** | **100%** | **Playwright Automated** |
+| **Khối 01: Bố cục, Điều hướng, Toolbar & Quản lý cột** | 09 | 22.0% | `Passed 100% (9/9)` |
+| **Khối 02: Thêm mới Nhân sự & Validation sao đỏ** | 10 | 24.4% | `Passed 100% (10/10)` |
+| **Khối 03: Chỉnh sửa Nhân sự & Ràng buộc Lý do chức vụ** | 05 | 12.2% | `Passed 100% (5/5)` |
+| **Khối 04: Đặt lại Mật khẩu & Xóa Nhân sự** | 06 | 14.6% | `Passed 100% (6/6)` |
+| **Khối 05: Xem Chi tiết, Tìm kiếm & Lọc Chip Phòng ban** | 04 | 9.8% | `Passed 100% (4/4)` |
+| **Khối 06: Kiểm tra Giới hạn độ dài tối đa (Max Length)** | 03 | 7.3% | `Tạm comment (Chờ SRS)` |
+| **Khối 07: Phân quyền truy cập (Access Control / RBAC)** | 04 | 9.7% | `Tạm comment (Chờ RBAC)` |
+| **TỔNG CỘNG ĐỘ PHỦ KIỂM THỬ** | **41 Test Cases** | **100%** | **34 Passed / 7 Scaffolded** |
 
 ---
 
-### 8.2. Chi tiết Ma trận Test Cases Automation (27 Test Cases)
+### 8.2. Chi tiết Ma trận Test Cases Automation (41 Test Cases)
 
 ### 8.2.1. KHỐI 01: BỐ CỤC, ĐIỀU HƯỚNG, TOOLBAR & QUẢN LÝ CỘT (Layout, Toolbar & Columns) (9 Test Cases)
 
@@ -250,18 +257,22 @@ flowchart TD
 | **TC_NS_008** | 01: BỐ CỤC, ĐIỀU HƯỚNG, TOOLBAR & QUẢN LÝ CỘT | Bỏ chọn dòng đưa các nút thao tác về trạng thái vô hiệu hóa ban đầu | 1. Bỏ tích chọn dòng nhân sự vừa chọn.<br><br>2. Kiểm tra trạng thái các nút thao tác. | 1. Toàn bộ các nút ngữ cảnh tự động trở về trạng thái vô hiệu hóa ban đầu. | Low | `personnelPage` |
 | **TC_NS_009** | 01: BỐ CỤC, ĐIỀU HƯỚNG, TOOLBAR & QUẢN LÝ CỘT | Chọn tất cả các dòng qua checkbox trên header bảng | 1. Nhấn tích chọn checkbox trên hàng Header của bảng.<br><br>2. Kiểm tra checkbox của toàn bộ các dòng nhân sự đang hiển thị. | 1. Toàn bộ các dòng nhân sự trên bảng đều được tích chọn đồng loạt.<br><br>2. Nút "Xóa" sáng lên sẵn sàng cho thao tác hàng loạt. | High | `personnelPage` |
 
-### 8.2.2. KHỐI 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ (Add Personnel & Validation) (5 Test Cases)
+### 8.2.2. KHỐI 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ (Add Personnel & Validation) (10 Test Cases)
 
 | Mã TC | Phân nhóm luồng | Tên kịch bản | Thao tác & Dữ liệu kiểm thử | Kết quả mong đợi | Mức độ ưu tiên | Mapping Page Object |
 | :--- | :--- | :--- | :--- | :--- | :---: | :--- |
 | **TC_NS_010** | 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ | Mở và kiểm tra cấu trúc tiêu đề cùng thông báo tự tạo mã/mật khẩu | 1. Nhấn nút "+ Thêm nhân sự" trên thanh công cụ.<br><br>2. Quan sát tiêu đề modal và dòng thông báo hướng dẫn. | 1. Modal mở ra đúng form thêm mới nhân sự.<br><br>2. Hiển thị thông báo rõ ràng về việc hệ thống sẽ tự động tạo Mã NS và Mật khẩu mặc định. | Low | `personnelPage` |
 | **TC_NS_011** | 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ | Đóng hộp thoại "Thêm nhân sự" bằng nút "Hủy" | 1. Mở modal thêm nhân sự.<br><br>2. Nhấn nút "Hủy" ở chân modal. | 1. Modal đóng lại an toàn mà không phát sinh dữ liệu thừa. | Low | `personnelPage` |
 | **TC_NS_012** | 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ | Đóng hộp thoại "Thêm nhân sự" bằng biểu tượng đóng [×] | 1. Mở modal thêm nhân sự.<br><br>2. Nhấn biểu tượng đóng [x] ở góc trên modal. | 1. Modal đóng lại ngay lập tức và giữ nguyên trạng thái danh sách. | Low | `personnelPage` |
-| **TC_NS_013** | 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ | Bỏ trống toàn bộ các trường bắt buộc khi nhấn nút "Lưu" | 1. Mở modal thêm nhân sự và để trống toàn bộ các ô nhập liệu.<br><br>2. Nhấn nút "Lưu". | 1. Hệ thống chặn lưu dữ liệu.<br><br>2. Hiển thị cảnh báo và đánh dấu viền đỏ các trường bắt buộc. | High | `personnelPage` |
+| **TC_NS_013** | 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ | Bỏ trống toàn bộ các trường bắt buộc khi nhấn nút "Lưu" | 1. Mở modal thêm nhân sự và để trống toàn bộ các ô nhập liệu.<br><br>2. Nhấn nút "Lưu". | 1. Hệ thống chặn lưu dữ liệu.<br><br>2. Hiển thị chính xác 9 câu thông báo lỗi đỏ tại 9 trường bắt buộc. | High | `personnelPage` |
+| **TC_NS_013_A** | 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ | Kiểm tra thông báo lỗi khi thêm dòng Bằng cấp/chứng chỉ nhưng bỏ trống thông tin bắt buộc | 1. Mở modal thêm nhân sự.<br><br>2. Nhấn "+ Thêm bằng cấp/chứng chỉ".<br><br>3. Nhấn "Lưu" mà không nhập thông tin bằng cấp. | 1. Hiển thị câu cảnh báo: "Vui lòng nhập tên bằng cấp hoặc chứng chỉ." và "Vui lòng chọn ngày cấp.". | High | `personnelPage` |
+| **TC_NS_013_B** | 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ | Kiểm tra thông báo lỗi khi thêm dòng Tài liệu khác nhưng bỏ trống tên tài liệu | 1. Mở modal thêm nhân sự.<br><br>2. Nhấn "+ Thêm tài liệu".<br><br>3. Nhấn "Lưu" mà không nhập tên tài liệu. | 1. Hiển thị câu cảnh báo: "Vui lòng nhập tên tài liệu.". | High | `personnelPage` |
+| **TC_NS_013_C** | 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ | Kiểm tra thông báo lỗi khi nhập Email không đúng định dạng | 1. Nhập email không hợp lệ (ví dụ: invalid-email).<br><br>2. Nhấn "Lưu". | 1. Hiển thị cảnh báo lỗi: "Email không đúng định dạng.". | High | `personnelPage` |
+| **TC_NS_013_D** | 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ | Kiểm tra thông báo lỗi khi nhập CCCD không đủ 12 chữ số | 1. Nhập CCCD dưới 12 chữ số (ví dụ: 9 số).<br><br>2. Nhấn "Lưu". | 1. Hiển thị cảnh báo lỗi: "CCCD phải gồm đúng 12 chữ số.". | High | `personnelPage` |
 | **TC_NS_014** | 02: THÊM MỚI NHÂN SỰ & VALIDATION SAO ĐỎ | Kiểm tra các trường thông tin bắt buộc phải có dấu sao đỏ | 1. Quan sát các nhãn trường trong modal thêm nhân sự.<br><br>2. Kiểm tra sự hiện diện của ký hiệu dấu sao đỏ (*). | 1. Các trường bắt buộc (Họ tên, Phòng ban, Chức vụ, SĐT, Email) đều có dấu sao đỏ rõ ràng. | Low | `personnelPage` |
 | **TC_NS_015** | Thêm mới Nhân sự & Validation sao đỏ | Thêm mới nhân sự thành công khi điền đầy đủ và hợp lệ các trường bắt buộc | 1. Nhấn nút "+ Thêm nhân sự" để mở form.<br><br>2. Điền đầy đủ và hợp lệ Họ tên, Email, Giới tính, Ngày sinh, CCCD, SĐT, Phòng ban, Chức vụ, Hợp đồng, Trạng thái.<br><br>3. Nhấn nút "Lưu". | 1. Hệ thống lưu thành công nhân sự mới và đóng modal.<br><br>2. Bản ghi mới xuất hiện trên danh sách với Mã NS tự sinh (NS-...) và đầy đủ thông tin. | Critical | `personnelPage` |
 
-### 8.2.3. KHỐI 03: CHỈNH SỬA NHÂN SỰ & RÀNG BUỘC LÝ DO CHỨC VỤ (Edit & Role Change Rule) (4 Test Cases)
+### 8.2.3. KHỐI 03: CHỈNH SỬA NHÂN SỰ & RÀNG BUỘC LÝ DO CHỨC VỤ (Edit & Role Change Rule) (5 Test Cases)
 
 | Mã TC | Phân nhóm luồng | Tên kịch bản | Thao tác & Dữ liệu kiểm thử | Kết quả mong đợi | Mức độ ưu tiên | Mapping Page Object |
 | :--- | :--- | :--- | :--- | :--- | :---: | :--- |
@@ -269,15 +280,18 @@ flowchart TD
 | **TC_NS_017** | 03: CHỈNH SỬA NHÂN SỰ & RÀNG BUỘC LÝ DO CHỨC VỤ | Kiểm tra trường "Mã NS" ở chế độ chỉ đọc (readonly) không thể sửa | 1. Quan sát ô nhập liệu "Mã NS" trong modal chỉnh sửa.<br><br>2. Thử nhấp chuột và gõ ký tự vào ô Mã NS. | 1. Ô "Mã NS" ở chế độ chỉ đọc (readonly), không cho phép chỉnh sửa.<br><br>2. Đảm bảo tính toàn vẹn định danh của nhân sự. | High | `personnelPage` |
 | **TC_NS_018** | 03: CHỈNH SỬA NHÂN SỰ & RÀNG BUỘC LÝ DO CHỨC VỤ | Kiểm tra trường "Lý do chỉnh sửa chức vụ" bị vô hiệu hóa khi chưa đổi chức vụ | 1. Mở modal chỉnh sửa nhân sự khi chưa thay đổi giá trị trong dropdown Chức vụ.<br><br>2. Quan sát ô textarea "Lý do chỉnh sửa chức vụ". | 1. Ô textarea lý do bị vô hiệu hóa (disabled / làm mờ).<br><br>2. Người dùng không cần và không thể nhập lý do khi chưa thay đổi chức vụ. | Low | `personnelPage` |
 | **TC_NS_019** | 03: CHỈNH SỬA NHÂN SỰ & RÀNG BUỘC LÝ DO CHỨC VỤ | Đóng hộp thoại "Chỉnh sửa nhân sự" bằng nút "Hủy" | 1. Mở modal chỉnh sửa nhân sự.<br><br>2. Nhấn nút "Hủy". | 1. Modal đóng lại an toàn và bảo lưu nguyên vẹn dữ liệu cũ. | Low | `personnelPage` |
+| **TC_NS_028** | 03: CHỈNH SỬA NHÂN SỰ & RÀNG BUỘC LÝ DO CHỨC VỤ | Chỉnh sửa thông tin nhân sự thành công và kiểm tra hiển thị đồng bộ tại danh sách và drawer chi tiết | 1. Tích chọn nhân sự và nhấn nút "Sửa".<br><br>2. Cập nhật số điện thoại cá nhân mới.<br><br>3. Nhấn nút "Lưu".<br><br>4. Mở drawer xem chi tiết nhân sự. | 1. Modal lưu thành công và đóng lại.<br><br>2. Thông tin mới cập nhật ngay trên danh sách và đồng bộ trong ngăn drawer chi tiết. | Critical | `personnelPage` |
 
-### 8.2.4. KHỐI 04: ĐẶT LẠI MẬT KHẨU & XÓA NHÂN SỰ (Reset Password & Delete) (4 Test Cases)
+### 8.2.4. KHỐI 04: ĐẶT LẠI MẬT KHẨU & XÓA NHÂN SỰ (Reset Password & Delete) (6 Test Cases)
 
 | Mã TC | Phân nhóm luồng | Tên kịch bản | Thao tác & Dữ liệu kiểm thử | Kết quả mong đợi | Mức độ ưu tiên | Mapping Page Object |
 | :--- | :--- | :--- | :--- | :--- | :---: | :--- |
 | **TC_NS_020** | 04: ĐẶT LẠI MẬT KHẨU & XÓA NHÂN SỰ | Mở hộp thoại "Xác nhận đặt lại mật khẩu" khi chọn nhân sự | 1. Tích chọn 1 nhân sự và nhấn nút "Đặt lại mật khẩu".<br><br>2. Quan sát modal xác nhận đặt lại mật khẩu. | 1. Modal xác nhận mở ra hiển thị thông điệp cảnh báo đặt lại mật khẩu về mặc định. | High | `personnelPage` |
 | **TC_NS_021** | 04: ĐẶT LẠI MẬT KHẨU & XÓA NHÂN SỰ | Đóng hộp thoại "Xác nhận đặt lại mật khẩu" bằng nút "Hủy" | 1. Mở modal xác nhận đặt lại mật khẩu.<br><br>2. Nhấn nút "Hủy". | 1. Modal đóng lại an toàn mà không thực hiện thay đổi mật khẩu của nhân sự. | Low | `personnelPage` |
+| **TC_NS_029** | 04: ĐẶT LẠI MẬT KHẨU & XÓA NHÂN SỰ | Xác nhận "Đặt lại mật khẩu" nhân sự thành công | 1. Tích chọn nhân sự và nhấn nút "Đặt lại mật khẩu".<br><br>2. Nhấn nút xác nhận "Đặt lại mật khẩu" trong popup. | 1. Hệ thống gửi yêu cầu đặt lại mật khẩu thành công (200 OK) và đóng popup xác nhận. | Major | `personnelPage` |
 | **TC_NS_022** | 04: ĐẶT LẠI MẬT KHẨU & XÓA NHÂN SỰ | Mở hộp thoại "Xác nhận xóa nhân sự" khi chọn nhân sự và nhấn "Xóa" | 1. Tích chọn nhân sự và nhấn nút "Xóa".<br><br>2. Quan sát modal xác nhận xóa nhân sự. | 1. Modal xác nhận xóa mở ra với thông điệp cảnh báo rõ ràng. | Critical | `personnelPage` |
 | **TC_NS_023** | 04: ĐẶT LẠI MẬT KHẨU & XÓA NHÂN SỰ | Đóng hộp thoại "Xác nhận xóa nhân sự" bằng nút "Hủy" | 1. Mở modal xác nhận xóa nhân sự.<br><br>2. Nhấn nút "Hủy". | 1. Modal đóng lại an toàn và bản ghi nhân sự vẫn được bảo toàn nguyên vẹn. | Low | `personnelPage` |
+| **TC_NS_030** | 04: ĐẶT LẠI MẬT KHẨU & XÓA NHÂN SỰ | Xác nhận "Xóa 1 nhân sự" thành công và kiểm tra bản ghi bị loại bỏ khỏi hệ thống | 1. Tích chọn nhân sự cần xóa.<br><br>2. Nhấn nút "Xóa" trên toolbar.<br><br>3. Nhấn nút "Xóa 1 nhân sự" trong popup xác nhận. | 1. Hệ thống xóa thành công bản ghi (200 OK), đóng modal và loại bỏ hoàn toàn nhân sự khỏi danh sách. | Critical | `personnelPage` |
 
 ### 8.2.5. KHỐI 05: XEM CHI TIẾT, TÌM KIẾM & LỌC CHIP PHÒNG BAN (View, Search & Filter) (4 Test Cases)
 
@@ -285,5 +299,22 @@ flowchart TD
 | :--- | :--- | :--- | :--- | :--- | :---: | :--- |
 | **TC_NS_024** | 05: XEM CHI TIẾT, TÌM KIẾM & LỌC CHIP PHÒNG BAN | Mở ngăn chi tiết nhân sự khi nhấn biểu tượng mắt (view) trên dòng | 1. Nhấn biểu tượng mắt (view) trên một dòng nhân sự.<br><br>2. Quan sát ngăn chi tiết trượt ra từ mép phải. | 1. Ngăn chi tiết Drawer mở ra hiển thị toàn bộ hồ sơ năng lực và lý lịch của nhân sự. | High | `personnelPage` |
 | **TC_NS_025** | 05: XEM CHI TIẾT, TÌM KIẾM & LỌC CHIP PHÒNG BAN | Nhập từ khóa tìm kiếm nhân sự và kiểm tra kích hoạt nút "Hủy" | 1. Nhập từ khóa tên nhân sự vào ô tìm kiếm.<br><br>2. Kiểm tra danh sách lọc và sự xuất hiện của nút "Hủy" (icon [x]) trong ô. | 1. Danh sách lọc ra đúng nhân sự khớp từ khóa.<br><br>2. Nút "Hủy" hiển thị sẵn sàng để xóa trắng từ khóa tìm kiếm. | High | `personnelPage` |
-| **TC_NS_027** | 05: XEM CHI TIẾT, TÌM KIẾM & LỌC CHIP PHÒNG BAN | Lọc theo danh mục chip Phòng/ban 1 và quay lại Tất cả | 1. Nhấn chip "Phòng/ban 1" ➔ Kiểm tra kết quả lọc.<br><br>2. Nhấn chip "Tất cả" ➔ Kiểm tra danh sách hiển thị lại toàn bộ. | 1. Danh sách lọc chính xác nhân sự theo phòng ban tương ứng.<br><br>2. Khi quay lại Tất cả, toàn bộ nhân sự viện được khôi phục. | High | `personnelPage` |
+| **TC_NS_026** | 05: XEM CHI TIẾT, TÌM KIẾM & LỌC CHIP PHÒNG BAN | Lọc theo danh mục chip Phòng/ban 1 và quay lại Tất cả | 1. Nhấn chip "Phòng/ban 1" ➔ Kiểm tra kết quả lọc.<br><br>2. Nhấn chip "Tất cả" ➔ Kiểm tra danh sách hiển thị lại toàn bộ. | 1. Danh sách lọc chính xác nhân sự theo phòng ban tương ứng.<br><br>2. Khi quay lại Tất cả, toàn bộ nhân sự viện được khôi phục. | High | `personnelPage` |
 | **TC_NS_027** | 05: XEM CHI TIẾT, TÌM KIẾM & LỌC CHIP PHÒNG BAN | Mở popover "Quản lý cột" từ nút ở chân bảng | 1. Nhấn nút "Quản lý cột" ở chân bảng.<br><br>2. Quan sát popover cấu hình danh sách cột. | 1. Popover mở ra cho phép người dùng tùy chọn ẩn/hiện từng cột hiển thị trên bảng. | Low | `personnelPage` |
+
+### 8.2.6. KHỐI 06: KIỂM TRA GIỚI HẠN ĐỘ DÀI TỐI ĐA (MAX LENGTH) (3 Test Cases - Tạm comment)
+
+| Mã TC | Phân nhóm luồng | Tên kịch bản | Thao tác & Dữ liệu kiểm thử | Kết quả mong đợi | Mức độ ưu tiên | Mapping Page Object |
+| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
+| **TC_NS_MAX_01** | 06: KIỂM TRA GIỚI HẠN ĐỘ DÀI TỐI ĐA | Nhập trường "Họ và tên" vượt quá giới hạn ký tự tối đa (256 ký tự) | 1. Mở form Thêm nhân sự.<br><br>2. Nhập chuỗi 256 ký tự vào ô "Họ và tên".<br><br>3. Nhấn nút "Lưu". | 1. Hệ thống báo lỗi vượt quá số ký tự tối đa cho phép (ví dụ: tối đa 255 ký tự). | Low | `personnelPage` |
+| **TC_NS_MAX_02** | 06: KIỂM TRA GIỚI HẠN ĐỘ DÀI TỐI ĐA | Nhập trường "Chức vụ" vượt quá giới hạn ký tự tối đa (256 ký tự) | 1. Mở form Thêm nhân sự.<br><br>2. Nhập chuỗi 256 ký tự vào ô "Chức vụ".<br><br>3. Nhấn nút "Lưu". | 1. Hệ thống báo lỗi vượt quá số ký tự tối đa cho phép. | Low | `personnelPage` |
+| **TC_NS_MAX_03** | 06: KIỂM TRA GIỚI HẠN ĐỘ DÀI TỐI ĐA | Nhập trường "Địa chỉ thường trú" vượt quá giới hạn ký tự tối đa (500 ký tự) | 1. Mở form Thêm nhân sự.<br><br>2. Nhập chuỗi 501 ký tự vào ô "Địa chỉ thường trú".<br><br>3. Nhấn nút "Lưu". | 1. Hệ thống báo lỗi vượt quá số ký tự tối đa cho phép. | Low | `personnelPage` |
+
+### 8.2.7. KHỐI 07: PHÂN QUYỀN TRUY CẬP (ACCESS CONTROL / RBAC) (4 Test Cases - Tạm comment)
+
+| Mã TC | Phân nhóm luồng | Tên kịch bản | Thao tác & Dữ liệu kiểm thử | Kết quả mong đợi | Mức độ ưu tiên | Mapping Page Object |
+| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
+| **TC_NS_RBAC_01** | 07: PHÂN QUYỀN TRUY CẬP (ACCESS CONTROL / RBAC) | Quyền truy cập - Tài khoản Quản trị viên (Admin) / Quản lý HR có quyền truy cập đầy đủ vào /nhan-su | 1. Đăng nhập tài khoản Quản trị viên (Admin) / Quản lý HR.<br><br>2. Điều hướng tới /nhan-su. | 1. Màn hình tải thành công, tab NHÂN SỰ active.<br><br>2. Hiển thị đầy đủ danh sách, bộ lọc và các nút tác vụ quản trị. | Critical | `personnelPage` |
+| **TC_NS_RBAC_02** | 07: PHÂN QUYỀN TRUY CẬP (ACCESS CONTROL / RBAC) | Quyền truy cập - Tài khoản Kỹ thuật viên (KNV / Lab) cố tình truy cập bằng URL trực tiếp bị chặn | 1. Đăng nhập tài khoản Kỹ thuật viên phòng LAB.<br><br>2. Cố tình truy cập trực tiếp bằng URL /nhan-su. | 1. Hệ thống chặn truy cập (báo lỗi 403 Forbidden hoặc tự động chuyển hướng về trang chủ /dashboard). | Critical | `personnelPage` |
+| **TC_NS_RBAC_03** | 07: PHÂN QUYỀN TRUY CẬP (ACCESS CONTROL / RBAC) | Quyền truy cập - Tài khoản Nhân viên kinh doanh (Sale) cố tình truy cập bằng URL trực tiếp bị chặn | 1. Đăng nhập tài khoản Nhân viên kinh doanh thông thường.<br><br>2. Cố tình truy cập trực tiếp bằng URL /nhan-su. | 1. Hệ thống chặn truy cập (báo lỗi 403 Forbidden hoặc tự động chuyển hướng về trang chủ /dashboard). | Critical | `personnelPage` |
+| **TC_NS_RBAC_04** | 07: PHÂN QUYỀN TRUY CẬP (ACCESS CONTROL / RBAC) | Phiên làm việc - Khách chưa đăng nhập cố tình truy cập trực tiếp /nhan-su bị chuyển hướng về /dang-nhap | 1. Xóa toàn bộ phiên đăng nhập (cookies / session).<br><br>2. Cố tình truy cập trực tiếp URL /nhan-su. | 1. Hệ thống tự động chuyển hướng người dùng về trang đăng nhập /dang-nhap. | Critical | `personnelPage` |

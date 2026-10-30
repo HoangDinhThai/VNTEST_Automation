@@ -80,6 +80,7 @@ export class PersonnelPage extends BasePage {
   readonly contractEndedAtTrigger: Locator;
   readonly statusSelect: Locator;
   readonly addQualificationButton: Locator;
+  readonly addDocumentButton: Locator;
   readonly socialInsuranceInput: Locator;
   readonly specialtyInput: Locator;
   readonly submittedDocumentsTextarea: Locator;
@@ -118,11 +119,36 @@ export class PersonnelPage extends BasePage {
   readonly deleteModalCloseButton: Locator;
 
   // ==========================================
+  // BỘ LỌC TRẠNG THÁI (STATUS FILTER)
+  // ==========================================
+  readonly statusFilterPopover: Locator;
+  readonly statusOptions: Locator;
+
+  // ==========================================
   // NGĂN CHI TIẾT NHÂN SỰ (DETAIL DRAWER)
   // ==========================================
   readonly detailDrawer: Locator;
   readonly detailDrawerContent: Locator;
   readonly detailDrawerCloseButton: Locator;
+  readonly detailHeader: Locator;
+  readonly detailAvatar: Locator;
+  readonly detailTitleName: Locator;
+  readonly detailStatusBadge: Locator;
+  readonly detailMetaCode: Locator;
+  readonly detailMetaPosition: Locator;
+  readonly detailMetaDept: Locator;
+  readonly detailHeaderCloseButton: Locator;
+  readonly detailInfoTab: Locator;
+  readonly detailHistoryTab: Locator;
+  readonly detailHistoryBadge: Locator;
+  readonly detailInfoBody: Locator;
+  readonly detailHistoryBody: Locator;
+  readonly detailPositionHistorySec: Locator;
+  readonly detailInfoHistorySec: Locator;
+  readonly detailDeleteButton: Locator;
+  readonly detailResetPasswordButton: Locator;
+  readonly detailEditButton: Locator;
+  readonly detailFooterCloseButton: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -190,7 +216,8 @@ export class PersonnelPage extends BasePage {
     this.contractTypeSelect = page.locator('#contract-type').first();
     this.contractEndedAtTrigger = page.locator('#contract-ended-at').first();
     this.statusSelect = page.locator('#status').first();
-    this.addQualificationButton = page.locator('button.ns-add-add-qualification').first();
+    this.addQualificationButton = page.locator('button').filter({ hasText: /\+ ?thêm bằng cấp/i }).first();
+    this.addDocumentButton = page.locator('button').filter({ hasText: /\+ ?thêm tài liệu/i }).first();
     this.socialInsuranceInput = page.locator('#social-insurance-number').first();
     this.specialtyInput = page.locator('#specialty').first();
     this.submittedDocumentsTextarea = page.locator('#submitted-documents').first();
@@ -222,10 +249,33 @@ export class PersonnelPage extends BasePage {
     this.deleteModalCancelButton = this.deleteModal.locator('button.btn').filter({ hasText: /hủy/i }).first();
     this.deleteModalCloseButton = this.deleteModal.locator('button.modal-close').first();
 
+    // Status Filter Popover
+    this.statusFilterPopover = page.locator('.popover__panel.dd-menu[role="listbox"]').first();
+    this.statusOptions = page.locator('.popover__panel.dd-menu .popover__option');
+
     // Detail Drawer
     this.detailDrawer = page.locator('aside.detail-panel.ns-detail-drawer').first();
     this.detailDrawerContent = page.locator('.ns-detail-info-body').first();
     this.detailDrawerCloseButton = page.locator('.ns-detail-drawer button.dp-close, .ns-detail-drawer button.modal-close, .ns-detail-drawer button[aria-label="Đóng"], .ns-detail-drawer footer button:has-text("Đóng")').first();
+    this.detailHeader = page.locator('.ns-detail-drawer.open .dp-header').first();
+    this.detailAvatar = page.locator('.ns-detail-drawer.open .dp-avatar').first();
+    this.detailTitleName = page.locator('.ns-detail-drawer.open .dp-title .name').first();
+    this.detailStatusBadge = page.locator('.ns-detail-drawer.open .dp-header .stat').first();
+    this.detailMetaCode = page.locator('.ns-detail-drawer.open .dp-meta .mono').first();
+    this.detailMetaPosition = page.locator('.ns-detail-drawer.open .dp-meta .dp-meta-item').nth(1);
+    this.detailMetaDept = page.locator('.ns-detail-drawer.open .dp-meta .dp-meta-item').nth(2);
+    this.detailHeaderCloseButton = page.locator('.ns-detail-drawer.open .dp-header .dp-close').first();
+    this.detailInfoTab = page.locator('.ns-detail-drawer.open .dp-tabs .dp-tab').filter({ hasText: /thông tin/i }).first();
+    this.detailHistoryTab = page.locator('.ns-detail-drawer.open .dp-tabs .dp-tab').filter({ hasText: /lịch sử/i }).first();
+    this.detailHistoryBadge = this.detailHistoryTab.locator('.badge, span:not(.lucide)').first();
+    this.detailInfoBody = page.locator('.ns-detail-drawer.open .ns-detail-info-body').first();
+    this.detailHistoryBody = page.locator('.ns-detail-drawer.open .ns-detail-history-body').first();
+    this.detailPositionHistorySec = page.locator('.ns-detail-drawer.open .ns-detail-sec').filter({ hasText: /lịch sử chức vụ/i }).first();
+    this.detailInfoHistorySec = page.locator('.ns-detail-drawer.open .ns-detail-sec').filter({ hasText: /lịch sử thay đổi thông tin/i }).first();
+    this.detailDeleteButton = page.locator('.ns-detail-drawer.open .dp-footer button').filter({ hasText: /xóa/i }).first();
+    this.detailResetPasswordButton = page.locator('.ns-detail-drawer.open .dp-footer button').filter({ hasText: /đổi mật khẩu/i }).first();
+    this.detailEditButton = page.locator('.ns-detail-drawer.open .dp-footer button').filter({ hasText: /chỉnh sửa/i }).first();
+    this.detailFooterCloseButton = page.locator('.ns-detail-drawer.open .dp-footer button').filter({ hasText: /^đóng$/i }).first();
   }
 
   /**
@@ -240,8 +290,11 @@ export class PersonnelPage extends BasePage {
    */
   async search(keyword: string): Promise<void> {
     Logger.info(`Tìm kiếm nhân sự với từ khóa: "${keyword}"`);
+    const searchRes = this.page.waitForResponse(res => res.url().includes('api/users') && (res.url().includes('q=') || res.status() === 200), { timeout: 8000 }).catch(() => null);
     await this.searchInput.fill(keyword);
     await this.searchInput.press('Enter');
+    await searchRes;
+    await this.page.waitForTimeout(500);
   }
 
   /**
@@ -249,7 +302,10 @@ export class PersonnelPage extends BasePage {
    */
   async clearSearch(): Promise<void> {
     Logger.info('Nhấn nút "Hủy" trên ô tìm kiếm');
+    const resetRes = this.page.waitForResponse(res => res.url().includes('api/users') && res.status() === 200, { timeout: 8000 }).catch(() => null);
     await this.clearSearchButton.click();
+    await resetRes;
+    await this.page.waitForTimeout(500);
   }
 
   /**
@@ -288,6 +344,7 @@ export class PersonnelPage extends BasePage {
    */
   async selectAll(): Promise<void> {
     Logger.info('Tích chọn ô "Chọn tất cả" trên header bảng');
+    await this.firstRow.waitFor({ state: 'visible', timeout: 10000 });
     await this.selectAllCheckbox.check();
   }
 
@@ -305,6 +362,8 @@ export class PersonnelPage extends BasePage {
   async openAddModal(): Promise<void> {
     Logger.info('Nhấn nút "Thêm" để mở hộp thoại thêm mới nhân sự');
     await this.addPersonnelButton.click();
+    await this.addModal.waitFor({ state: 'visible' });
+    await this.departmentSelect.locator('option').nth(1).waitFor({ state: 'attached', timeout: 5000 }).catch(() => {});
   }
 
   /**
@@ -321,6 +380,22 @@ export class PersonnelPage extends BasePage {
   async closeAddModal(): Promise<void> {
     Logger.info('Nhấn nút "Đóng" [×] trên hộp thoại thêm nhân sự');
     await this.addModalCloseButton.click();
+  }
+
+  /**
+   * Thêm 1 dòng bằng cấp / chứng chỉ mới
+   */
+  async addQualificationRow(): Promise<void> {
+    Logger.info('Nhấn nút "+ Thêm bằng cấp/chứng chỉ"');
+    await this.addQualificationButton.click();
+  }
+
+  /**
+   * Thêm 1 dòng tài liệu khác mới
+   */
+  async addDocumentRow(): Promise<void> {
+    Logger.info('Nhấn nút "+ Thêm tài liệu"');
+    await this.addDocumentButton.click();
   }
 
   /**
@@ -380,12 +455,35 @@ export class PersonnelPage extends BasePage {
   }
 
   /**
+   * Mở dropdown bộ lọc trạng thái
+   */
+  async openStatusFilter(): Promise<void> {
+    Logger.info('Mở dropdown bộ lọc trạng thái');
+    await this.statusFilterDropdown.click();
+    await this.statusFilterPopover.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Chọn một trạng thái cụ thể trong dropdown lọc
+   */
+  async selectStatusFilter(statusText: string): Promise<void> {
+    Logger.info(`Chọn trạng thái lọc: "${statusText}"`);
+    await this.openStatusFilter();
+    const option = this.statusOptions.filter({ hasText: new RegExp(`^\\s*${statusText}\\s*$`, 'i') }).first();
+    const apiPromise = this.page.waitForResponse(res => res.url().includes('api/users'));
+    await option.click();
+    await apiPromise;
+    await this.page.waitForTimeout(400);
+  }
+
+  /**
    * Mở ngăn Chi tiết nhân sự bằng nút mắt (view button) tại dòng chỉ định
    */
   async openDetail(rowIndex = 0): Promise<void> {
     Logger.info(`Nhấn biểu tượng xem chi tiết (mắt) tại dòng ${rowIndex + 1}`);
     const viewBtn = this.rows.nth(rowIndex).locator('button.px-view-button, button:has(svg.lucide-eye)').first();
     await viewBtn.click();
+    await this.page.waitForSelector('.ns-detail-drawer.open', { timeout: 10000 });
   }
 
   /**
@@ -393,9 +491,40 @@ export class PersonnelPage extends BasePage {
    */
   async closeDetail(): Promise<void> {
     Logger.info('Đóng ngăn chi tiết nhân sự');
-    if (await this.detailDrawerCloseButton.isVisible()) {
-      await this.detailDrawerCloseButton.click();
+    const closeBtn = this.page.locator('.ns-detail-drawer.open button.dp-close, .ns-detail-drawer.open footer button:has-text("Đóng")').first();
+    if (await closeBtn.isVisible()) {
+      await closeBtn.click();
+      await this.page.locator('.ns-detail-drawer').waitFor({ state: 'attached' });
+      await this.page.waitForTimeout(300);
     }
+  }
+
+  /**
+   * Chuyển sang Tab "Thông tin" trong ngăn chi tiết
+   */
+  async switchToInfoTab(): Promise<void> {
+    Logger.info('Chuyển sang tab "Thông tin" trong ngăn chi tiết');
+    await this.detailInfoTab.click();
+    await this.detailInfoBody.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Chuyển sang Tab "Lịch sử" trong ngăn chi tiết
+   */
+  async switchToHistoryTab(): Promise<void> {
+    Logger.info('Chuyển sang tab "Lịch sử" trong ngăn chi tiết');
+    await this.detailHistoryTab.click();
+    await this.detailHistoryBody.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Lấy giá trị của một trường dữ liệu trong Tab "Thông tin" theo nhãn (label)
+   */
+  async getDetailFieldValue(label: string): Promise<string> {
+    const fieldContainer = this.page.locator('.ns-detail-drawer.open .ns-detail-grid > div').filter({
+      has: this.page.locator(`.lbl:has-text("${label}")`)
+    }).first();
+    return (await fieldContainer.locator('strong').innerText()).trim();
   }
 
   /**
@@ -429,6 +558,16 @@ export class PersonnelPage extends BasePage {
     position: string;
     contractType?: 'probation' | 'fixed_term' | 'indefinite';
     status?: 'probation' | 'working' | 'long_leave' | 'resigned' | 'contract_terminated';
+    issuedPlace?: string;
+    companyPhone?: string;
+    permanentAddress?: string;
+    bankAccount?: string;
+    bankName?: string;
+    emergencyPhone?: string;
+    emergencyRelation?: string;
+    concurrentPosition?: string;
+    socialInsurance?: string;
+    specialty?: string;
   }): Promise<void> {
     Logger.info(`Điền thông tin thêm nhân sự: ${data.name} - ${data.email}`);
     await this.nameInput.fill(data.name);
@@ -454,6 +593,36 @@ export class PersonnelPage extends BasePage {
       await this.statusSelect.selectOption(data.status);
     } else {
       await this.statusSelect.selectOption('working');
+    }
+    if (data.issuedPlace) {
+      await this.citizenIdIssuedPlaceInput.fill(data.issuedPlace);
+    }
+    if (data.companyPhone) {
+      await this.companyPhoneInput.fill(data.companyPhone);
+    }
+    if (data.permanentAddress) {
+      await this.permanentAddressTextarea.fill(data.permanentAddress);
+    }
+    if (data.bankAccount) {
+      await this.bankAccountInput.fill(data.bankAccount);
+    }
+    if (data.bankName) {
+      await this.bankNameInput.fill(data.bankName);
+    }
+    if (data.emergencyPhone) {
+      await this.emergencyPhoneInput.fill(data.emergencyPhone);
+    }
+    if (data.emergencyRelation) {
+      await this.emergencyRelationInput.fill(data.emergencyRelation);
+    }
+    if (data.concurrentPosition) {
+      await this.concurrentPositionInput.fill(data.concurrentPosition);
+    }
+    if (data.socialInsurance) {
+      await this.socialInsuranceInput.fill(data.socialInsurance);
+    }
+    if (data.specialty) {
+      await this.specialtyInput.fill(data.specialty);
     }
   }
 

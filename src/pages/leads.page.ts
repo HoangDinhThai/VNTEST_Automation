@@ -19,6 +19,7 @@ export class LeadsPage extends BasePage {
   readonly filterClosedChip: Locator;
   readonly filterFailedChip: Locator;
   readonly priorityFilterButton: Locator;
+  readonly priorityMenu: Locator;
 
   // Danh sách Thẻ Lead
   readonly leadCards: Locator;
@@ -29,15 +30,21 @@ export class LeadsPage extends BasePage {
 
   // Khung chi tiết Lead (Panel bên phải)
   readonly detailPanel: Locator;
+  readonly detailLeadCode: Locator;
   readonly detailCustomerName: Locator;
   readonly detailCompany: Locator;
   readonly detailContacts: Locator;
+  readonly detailDegreeChip: Locator;
+  readonly detailStatusChip: Locator;
+  readonly statusStepper: Locator;
   readonly detailSource: Locator;
   readonly detailAssignee: Locator;
   readonly detailReceivedDate: Locator;
   readonly detailEstimatedValue: Locator;
   readonly detailServices: Locator;
   readonly detailSpecificDemand: Locator;
+  readonly detailFooterBanner: Locator;
+  readonly emptyState: Locator;
   readonly editLeadButton: Locator;
   readonly recordNoteButton: Locator;
   readonly createQuoteButton: Locator;
@@ -113,25 +120,32 @@ export class LeadsPage extends BasePage {
     this.filterClosedChip = page.locator('.lead-chip').filter({ hasText: 'Đã chốt' });
     this.filterFailedChip = page.locator('.lead-chip').filter({ hasText: 'Thất bại' });
     this.priorityFilterButton = page.locator('.popover__trigger.dd');
+    this.priorityMenu = page.locator('.popover__menu, .dropdown-menu, [role="menu"]');
 
     // Lead Cards & Pagination
     this.leadCards = page.locator('.lead-card');
     this.firstLeadCard = page.locator('.lead-card').first();
     this.paginationInfo = page.getByText(/Hiện \d+–\d+ \/ \d+ lead/);
-    this.nextPageButton = page.locator('button[aria-label="Trang sau."]');
-    this.prevPageButton = page.locator('button[aria-label="Trang trước."]');
+    this.nextPageButton = page.locator('button[aria-label="Trang sau."], button[aria-label="Trang sau"]');
+    this.prevPageButton = page.locator('button[aria-label="Trang trước."], button[aria-label="Trang trước"]');
 
     // Detail Panel
     this.detailPanel = page.locator('aside.lead-detail-panel');
+    this.detailLeadCode = page.locator('aside.lead-detail-panel .lead-detail-header__code, aside.lead-detail-panel [class*="code"]').first();
     this.detailCustomerName = page.locator('aside.lead-detail-panel .lead-detail-header__name');
     this.detailCompany = page.locator('aside.lead-detail-panel .lead-detail-header__company');
     this.detailContacts = page.locator('aside.lead-detail-panel .lead-detail-header__contacts');
+    this.detailDegreeChip = page.locator('aside.lead-detail-panel [class*="badge"], aside.lead-detail-panel [class*="degree"]').first();
+    this.detailStatusChip = page.locator('aside.lead-detail-panel [class*="status"], aside.lead-detail-panel [class*="chip"]').first();
+    this.statusStepper = page.locator('aside.lead-detail-panel [class*="stepper"], aside.lead-detail-panel .step-wizard, aside.lead-detail-panel nav');
     this.detailSource = page.locator('aside.lead-detail-panel .lead-detail-attr-item, aside.lead-detail-panel .ml-info').filter({ hasText: 'NGUỒN LEAD' });
     this.detailAssignee = page.locator('aside.lead-detail-panel .lead-detail-attr-item, aside.lead-detail-panel .ml-info').filter({ hasText: 'NGƯỜI PHỤ TRÁCH' });
     this.detailReceivedDate = page.locator('aside.lead-detail-panel .lead-detail-attr-item, aside.lead-detail-panel .ml-info').filter({ hasText: 'NGÀY TIẾP NHẬN' });
     this.detailEstimatedValue = page.locator('aside.lead-detail-panel .lead-detail-attr-item, aside.lead-detail-panel .ml-info').filter({ hasText: 'GIÁ TRỊ ƯỚC TÍNH' });
     this.detailServices = page.locator('aside.lead-detail-panel .lead-detail-attr-item, aside.lead-detail-panel .ml-info').filter({ hasText: 'DỊCH VỤ QUAN TÂM' });
     this.detailSpecificDemand = page.locator('aside.lead-detail-panel [class*="demand"], aside.lead-detail-panel .ml-sec').filter({ hasText: 'NHU CẦU CỤ THỂ' });
+    this.detailFooterBanner = page.locator('aside.lead-detail-panel').getByText(/đã chốt thành khách hàng/i);
+    this.emptyState = page.getByText(/không tìm thấy|không có dữ liệu|danh sách trống/i);
     this.editLeadButton = page.getByRole('button', { name: 'Chỉnh sửa' });
     this.recordNoteButton = page.getByRole('button', { name: 'Ghi nhận' });
     this.createQuoteButton = page.getByRole('button', { name: 'Tạo báo giá' });
@@ -214,6 +228,24 @@ export class LeadsPage extends BasePage {
   async clearSearch(): Promise<void> {
     Logger.info('Nhấn nút "Hủy" trên thanh tìm kiếm');
     await this.clearSearchButton.click();
+  }
+
+  /**
+   * Lọc theo mức độ nhiệt của Lead (Nóng / Ấm / Lạnh / Tất cả)
+   */
+  async filterByDegree(degree: 'Tất cả' | 'Nóng' | 'Ấm' | 'Lạnh'): Promise<void> {
+    Logger.info(`Lọc theo mức độ: ${degree}`);
+    await this.priorityFilterButton.click();
+    await this.priorityMenu.getByText(degree, { exact: true }).click();
+  }
+
+  /**
+   * Mở hộp thoại Chỉnh sửa Lead
+   */
+  async openEditModal(): Promise<void> {
+    Logger.info('Nhấn nút "Chỉnh sửa"');
+    await this.editLeadButton.click();
+    await this.modal.waitFor({ state: 'visible' });
   }
 
   /**

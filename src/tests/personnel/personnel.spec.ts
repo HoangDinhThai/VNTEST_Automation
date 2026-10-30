@@ -12,6 +12,7 @@ test.describe('Module Quản lý Nhân sự - Hệ thống VNTEST LIMS', () => {
     await personnelPage.open('/nhan-su');
     await expect(personnelPage.personnelTab).toBeVisible({ timeout: 15000 });
     await expect(personnelPage.table).toBeVisible({ timeout: 15000 });
+    await expect(personnelPage.firstRow).toBeVisible({ timeout: 15000 });
   });
 
   // ==========================================
@@ -203,17 +204,133 @@ test.describe('Module Quản lý Nhân sự - Hệ thống VNTEST LIMS', () => {
     Logger.step(2, 'Nhấn nút "Lưu" mà không điền thông tin');
     await personnelPage.submitAddForm();
 
-    Logger.step('Verify', 'Kích hoạt thông báo lỗi tại các trường bắt buộc');
-    const hasFormError = await personnelPage.formErrors.first().isVisible({ timeout: 5000 }).catch(() => false);
-    if (hasFormError) {
-      await expect(personnelPage.formErrors.first()).toBeVisible();
-    } else {
-      await expect(personnelPage.addModal.locator('.error, .text-danger, small, .invalid-feedback').first().or(personnelPage.addModal)).toBeVisible();
-    }
+    Logger.step('Verify', 'Hiển thị đầy đủ thông báo lỗi màu đỏ tại 9 trường bắt buộc');
+    await expect(personnelPage.addModal).toContainText('Vui lòng nhập họ và tên.');
+    await expect(personnelPage.addModal).toContainText('Vui lòng nhập email.');
+    await expect(personnelPage.addModal).toContainText('Vui lòng chọn giới tính.');
+    await expect(personnelPage.addModal).toContainText('Vui lòng chọn ngày sinh.');
+    await expect(personnelPage.addModal).toContainText('Vui lòng nhập CCCD.');
+    await expect(personnelPage.addModal).toContainText('Vui lòng nhập số điện thoại cá nhân.');
+    await expect(personnelPage.addModal).toContainText('Vui lòng chọn phòng/ban.');
+    await expect(personnelPage.addModal).toContainText('Vui lòng nhập chức vụ.');
+    await expect(personnelPage.addModal).toContainText('Vui lòng chọn loại hợp đồng.');
 
     Logger.step('Teardown', 'Đóng hộp thoại');
     await personnelPage.cancelAddModal();
   });
+
+  test('TC_NS_013_A: Kiểm tra thông báo lỗi khi thêm dòng Bằng cấp/chứng chỉ nhưng bỏ trống thông tin bắt buộc', {
+    tag: ['@high', '@major']
+  }, async ({ personnelPage }) => {
+    Logger.step(1, 'Mở hộp thoại Thêm nhân sự');
+    await personnelPage.openAddModal();
+
+    Logger.step(2, 'Nhấn nút "+ Thêm bằng cấp/chứng chỉ"');
+    await personnelPage.addQualificationRow();
+
+    Logger.step(3, 'Nhấn nút "Lưu" mà không điền thông tin bằng cấp');
+    await personnelPage.submitAddForm();
+
+    Logger.step('Verify', 'Hiển thị lỗi bắt buộc tại dòng bằng cấp');
+    await expect(personnelPage.addModal).toContainText('Vui lòng nhập tên bằng cấp hoặc chứng chỉ.');
+    await expect(personnelPage.addModal).toContainText('Vui lòng chọn ngày cấp.');
+
+    Logger.step('Teardown', 'Đóng hộp thoại');
+    await personnelPage.cancelAddModal();
+  });
+
+  test('TC_NS_013_B: Kiểm tra thông báo lỗi khi thêm dòng Tài liệu khác nhưng bỏ trống tên tài liệu', {
+    tag: ['@high', '@major']
+  }, async ({ personnelPage }) => {
+    Logger.step(1, 'Mở hộp thoại Thêm nhân sự');
+    await personnelPage.openAddModal();
+
+    Logger.step(2, 'Nhấn nút "+ Thêm tài liệu"');
+    await personnelPage.addDocumentRow();
+
+    Logger.step(3, 'Nhấn nút "Lưu" mà không điền tên tài liệu');
+    await personnelPage.submitAddForm();
+
+    Logger.step('Verify', 'Hiển thị lỗi bắt buộc tại dòng tài liệu');
+    await expect(personnelPage.addModal).toContainText('Vui lòng nhập tên tài liệu.');
+
+    Logger.step('Teardown', 'Đóng hộp thoại');
+    await personnelPage.cancelAddModal();
+  });
+
+  test('TC_NS_013_C: Kiểm tra thông báo lỗi khi nhập Email không đúng định dạng', {
+    tag: ['@high', '@major']
+  }, async ({ personnelPage }) => {
+    Logger.step(1, 'Mở hộp thoại Thêm nhân sự và nhập email sai định dạng');
+    await personnelPage.openAddModal();
+    await personnelPage.emailInput.fill('invalid-email-address');
+
+    Logger.step(2, 'Nhấn nút "Lưu" để kích hoạt kiểm tra định dạng');
+    await personnelPage.submitAddForm();
+
+    Logger.step('Verify', 'Hiển thị câu cảnh báo lỗi định dạng email');
+    await expect(personnelPage.addModal).toContainText('Email không đúng định dạng.');
+
+    Logger.step('Teardown', 'Đóng hộp thoại');
+    await personnelPage.cancelAddModal();
+  });
+
+  test('TC_NS_013_D: Kiểm tra thông báo lỗi khi nhập CCCD không đủ 12 chữ số', {
+    tag: ['@high', '@major']
+  }, async ({ personnelPage, page }) => {
+    Logger.step(1, 'Mở hộp thoại Thêm nhân sự và điền các trường với CCCD dưới 12 chữ số');
+    await personnelPage.openAddModal();
+    await personnelPage.fillAddPersonnelForm({
+      name: 'Test CCCD Validation',
+      email: 'valid_cccd_test@vntest.vn',
+      gender: 'male',
+      citizenId: '001203456', // < 12 chữ số
+      phone: '0981234567',
+      department: '1',
+      position: 'Kiểm nghiệm viên',
+      contractType: 'fixed_term',
+      status: 'working'
+    });
+
+    Logger.step(2, 'Nhấn nút "Lưu" để kích hoạt kiểm tra độ dài CCCD');
+    await personnelPage.submitAddForm();
+
+    Logger.step('Verify', 'Hiển thị câu cảnh báo lỗi CCCD phải gồm đúng 12 chữ số');
+    await expect(personnelPage.addModal).toContainText('CCCD phải gồm đúng 12 chữ số.');
+
+    Logger.step('Teardown', 'Đóng hộp thoại');
+    await personnelPage.cancelAddModal();
+  });
+
+  // =========================================================================
+  // CÁC TEST CASES MAX LENGTH (TẠM THỜI COMMENT DO ĐẶC TẢ HỆ THỐNG CHƯA NÊU RÕ)
+  // =========================================================================
+  // test('TC_NS_MAX_01: Nhập trường "Họ và tên" vượt quá giới hạn ký tự tối đa (256 ký tự)', async ({ personnelPage }) => {
+  //   // TODO: Bật lại khi SRS đặc tả rõ maxlength của Họ và tên (ví dụ: 255 ký tự)
+  //   await personnelPage.openAddModal();
+  //   await personnelPage.nameInput.fill('A'.repeat(256));
+  //   await personnelPage.submitAddForm();
+  //   await expect(personnelPage.addModal.locator('.ns-add-error')).toContainText(/quá 255 ký tự/i);
+  //   await personnelPage.cancelAddModal();
+  // });
+  //
+  // test('TC_NS_MAX_02: Nhập trường "Chức vụ" vượt quá giới hạn ký tự tối đa (256 ký tự)', async ({ personnelPage }) => {
+  //   // TODO: Bật lại khi SRS đặc tả rõ maxlength của Chức vụ (ví dụ: 255 ký tự)
+  //   await personnelPage.openAddModal();
+  //   await personnelPage.positionInput.fill('B'.repeat(256));
+  //   await personnelPage.submitAddForm();
+  //   await expect(personnelPage.addModal.locator('.ns-add-error')).toContainText(/quá 255 ký tự/i);
+  //   await personnelPage.cancelAddModal();
+  // });
+  //
+  // test('TC_NS_MAX_03: Nhập trường "Địa chỉ thường trú" vượt quá giới hạn ký tự tối đa (500 ký tự)', async ({ personnelPage }) => {
+  //   // TODO: Bật lại khi SRS đặc tả rõ maxlength của Địa chỉ thường trú (ví dụ: 500 ký tự)
+  //   await personnelPage.openAddModal();
+  //   await personnelPage.permanentAddressTextarea.fill('C'.repeat(501));
+  //   await personnelPage.submitAddForm();
+  //   await expect(personnelPage.addModal.locator('.ns-add-error')).toContainText(/quá 500 ký tự/i);
+  //   await personnelPage.cancelAddModal();
+  // });
 
   test('TC_NS_014: Kiểm tra các trường thông tin bắt buộc phải có dấu sao đỏ', {
     tag: ['@normal', '@minor']
@@ -280,8 +397,10 @@ test.describe('Module Quản lý Nhân sự - Hệ thống VNTEST LIMS', () => {
 
     Logger.step('Teardown', 'Dọn dẹp: Xóa nhân sự test vừa tạo');
     await row.locator('input[type="checkbox"]').check();
+    await expect(personnelPage.deletePersonnelButton).not.toHaveClass(/disabled/);
     await personnelPage.openDeleteModal();
-    const deleteResPromise = page.waitForResponse(res => res.request().method() === 'DELETE' || (res.request().method() === 'POST' && res.url().includes('delete')));
+    await expect(personnelPage.deleteModal).toBeVisible();
+    const deleteResPromise = page.waitForResponse(res => res.url().includes('api/users') && (res.request().method() === 'DELETE' || res.status() === 200));
     await personnelPage.confirmDelete();
     await deleteResPromise;
     await expect(personnelPage.deleteModal).toBeHidden();
@@ -359,6 +478,77 @@ test.describe('Module Quản lý Nhân sự - Hệ thống VNTEST LIMS', () => {
     await personnelPage.unselectRow(0);
   });
 
+  test('TC_NS_028: Chỉnh sửa thông tin nhân sự thành công và kiểm tra hiển thị đồng bộ tại danh sách và drawer chi tiết', {
+    tag: ['@high', '@critical']
+  }, async ({ personnelPage, page }) => {
+    const ts = Date.now().toString().slice(-6);
+    const testName = `QA Edit ${ts}`;
+    const testEmail = `qa_edit${ts}@vntest.vn`;
+    const testCccd = `001204${ts}`;
+    const testPhone = `0982${ts}`;
+    const updatedPhone = `0983${ts}`;
+
+    Logger.step('Setup', 'Tạo 1 nhân sự test để chuẩn bị chỉnh sửa');
+    await personnelPage.openAddModal();
+    await personnelPage.fillAddPersonnelForm({
+      name: testName,
+      email: testEmail,
+      gender: 'female',
+      citizenId: testCccd,
+      phone: testPhone,
+      department: '1',
+      position: 'Chuyên viên QA',
+      contractType: 'fixed_term',
+      status: 'working'
+    });
+    const createResPromise = page.waitForResponse(res => res.url().includes('api/users') && res.request().method() === 'POST');
+    await personnelPage.submitAddForm();
+    await createResPromise;
+    await expect(personnelPage.addModal).toBeHidden();
+
+    Logger.step(1, 'Tìm kiếm và chọn nhân sự test vừa tạo');
+    await personnelPage.search(testName);
+    const row = personnelPage.rows.first();
+    await expect(row).toContainText(testName);
+    await row.locator('input[type="checkbox"]').check();
+
+    Logger.step(2, 'Nhấn nút "Sửa" và cập nhật số điện thoại cá nhân mới');
+    await expect(personnelPage.editPersonnelButton).not.toHaveClass(/disabled/);
+    await personnelPage.openEditModal();
+    await expect(personnelPage.editModal).toBeVisible();
+    await personnelPage.fillEditPersonnelForm({ phone: updatedPhone });
+
+    Logger.step(3, 'Nhấn nút "Lưu" trên form chỉnh sửa');
+    const updateResPromise = page.waitForResponse(res => res.url().includes('api/users/') && res.request().method() === 'POST');
+    await personnelPage.submitEditForm();
+    const updateRes = await updateResPromise;
+    expect(updateRes.status()).toBe(200);
+    await expect(personnelPage.editModal).toBeHidden();
+
+    Logger.step('Verify 1', 'Số điện thoại mới hiển thị cập nhật ngay trên dòng danh sách');
+    await expect(row).toContainText(updatedPhone);
+
+    Logger.step('Verify 2', 'Mở ngăn Chi tiết nhân sự (drawer) và kiểm tra thông tin đồng bộ');
+    await row.locator('button.px-view-button, button:has(svg.lucide-eye)').click();
+    await page.waitForSelector('.ns-detail-info-body', { timeout: 10000 });
+    await expect(personnelPage.detailDrawer).toContainText(testName);
+    await expect(personnelPage.detailDrawer).toContainText(updatedPhone);
+    await personnelPage.closeDetail();
+
+    Logger.step('Teardown', 'Dọn dẹp: Xóa nhân sự test');
+    if (!await row.locator('input[type="checkbox"]').isChecked()) {
+      await row.locator('input[type="checkbox"]').check();
+    }
+    await expect(personnelPage.deletePersonnelButton).not.toHaveClass(/disabled/);
+    await personnelPage.openDeleteModal();
+    await expect(personnelPage.deleteModal).toBeVisible();
+    const deleteResPromise = page.waitForResponse(res => res.url().includes('api/users') && (res.request().method() === 'DELETE' || res.status() === 200));
+    await personnelPage.confirmDelete();
+    await deleteResPromise;
+    await expect(personnelPage.deleteModal).toBeHidden();
+    await personnelPage.clearSearch();
+  });
+
   // ==========================================
   // KHỐI 06: HỘP THOẠI XÁC NHẬN ĐẶT LẠI MẬT KHẨU
   // ==========================================
@@ -397,6 +587,67 @@ test.describe('Module Quản lý Nhân sự - Hệ thống VNTEST LIMS', () => {
 
     Logger.step('Teardown', 'Bỏ chọn dòng');
     await personnelPage.unselectRow(0);
+  });
+
+  test('TC_NS_029: Xác nhận "Đặt lại mật khẩu" nhân sự thành công', {
+    tag: ['@high', '@major']
+  }, async ({ personnelPage, page }) => {
+    const ts = Date.now().toString().slice(-6);
+    const testName = `QA Reset ${ts}`;
+    const testEmail = `qa_reset${ts}@vntest.vn`;
+    const testCccd = `001205${ts}`;
+    const testPhone = `0984${ts}`;
+
+    Logger.step('Setup', 'Tạo 1 nhân sự test để chuẩn bị đặt lại mật khẩu');
+    await personnelPage.openAddModal();
+    await personnelPage.fillAddPersonnelForm({
+      name: testName,
+      email: testEmail,
+      gender: 'male',
+      citizenId: testCccd,
+      phone: testPhone,
+      department: '1',
+      position: 'Kỹ thuật viên',
+      contractType: 'fixed_term',
+      status: 'working'
+    });
+    const createResPromise = page.waitForResponse(res => res.url().includes('api/users') && res.request().method() === 'POST');
+    await personnelPage.submitAddForm();
+    await createResPromise;
+    await expect(personnelPage.addModal).toBeHidden();
+
+    Logger.step(1, 'Tìm kiếm và chọn nhân sự');
+    await personnelPage.search(testName);
+    const row = personnelPage.rows.first();
+    await expect(row).toContainText(testName);
+    await row.locator('input[type="checkbox"]').check();
+
+    Logger.step(2, 'Nhấn nút "Đặt lại mật khẩu" để mở popup xác nhận');
+    await expect(personnelPage.resetPasswordButton).not.toHaveClass(/disabled/);
+    await personnelPage.openResetPasswordModal();
+    await expect(personnelPage.resetPasswordModal).toBeVisible();
+
+    Logger.step(3, 'Nhấn nút "Đặt lại mật khẩu" trong popup xác nhận');
+    const resetResPromise = page.waitForResponse(res => res.url().includes('reset-password') || res.url().includes('password') || (res.request().method() === 'POST' && res.url().includes('api/users')));
+    await personnelPage.confirmResetPassword();
+    const resetRes = await resetResPromise;
+    expect(resetRes.status()).toBe(200);
+
+    Logger.step('Verify', 'Popup xác nhận đặt lại mật khẩu đóng lại');
+    await expect(personnelPage.resetPasswordModal).toBeHidden();
+
+    Logger.step('Teardown', 'Dọn dẹp: Xóa nhân sự test');
+    if (!await row.locator('input[type="checkbox"]').isChecked()) {
+      await row.locator('input[type="checkbox"]').check();
+    }
+    await expect(personnelPage.deletePersonnelButton).not.toHaveClass(/disabled/);
+    await personnelPage.openDeleteModal();
+    await expect(personnelPage.deleteModal).toBeVisible();
+    const deleteResPromise = page.waitForResponse(res => res.url().includes('api/users') && (res.request().method() === 'DELETE' || res.status() === 200));
+    await personnelPage.confirmDelete();
+    await deleteResPromise;
+    await expect(personnelPage.deleteModal).toBeHidden();
+    await personnelPage.clearSearch();
   });
 
   // ==========================================
@@ -440,8 +691,58 @@ test.describe('Module Quản lý Nhân sự - Hệ thống VNTEST LIMS', () => {
     await personnelPage.unselectRow(0);
   });
 
+  test('TC_NS_030: Xác nhận "Xóa 1 nhân sự" thành công và kiểm tra bản ghi bị loại bỏ khỏi hệ thống', {
+    tag: ['@high', '@critical']
+  }, async ({ personnelPage, page }) => {
+    const ts = Date.now().toString().slice(-6);
+    const testName = `QA Del ${ts}`;
+    const testEmail = `qa_del${ts}@vntest.vn`;
+    const testCccd = `001206${ts}`;
+    const testPhone = `0985${ts}`;
+
+    Logger.step('Setup', 'Tạo 1 nhân sự test để chuẩn bị kiểm thử thao tác xóa');
+    await personnelPage.openAddModal();
+    await personnelPage.fillAddPersonnelForm({
+      name: testName,
+      email: testEmail,
+      gender: 'female',
+      citizenId: testCccd,
+      phone: testPhone,
+      department: '1',
+      position: 'Thử nghiệm viên',
+      contractType: 'probation',
+      status: 'probation'
+    });
+    const createResPromise = page.waitForResponse(res => res.url().includes('api/users') && res.request().method() === 'POST');
+    await personnelPage.submitAddForm();
+    await createResPromise;
+    await expect(personnelPage.addModal).toBeHidden();
+
+    Logger.step(1, 'Tìm kiếm nhân sự test và tích chọn');
+    await personnelPage.search(testName);
+    const row = personnelPage.rows.first();
+    await expect(row).toContainText(testName);
+    await row.locator('input[type="checkbox"]').check();
+
+    Logger.step(2, 'Nhấn nút "Xóa" trên thanh công cụ');
+    await expect(personnelPage.deletePersonnelButton).not.toHaveClass(/disabled/);
+    await personnelPage.openDeleteModal();
+    await expect(personnelPage.deleteModal).toBeVisible();
+
+    Logger.step(3, 'Nhấn nút "Xóa 1 nhân sự" trong popup xác nhận');
+    const deleteResPromise = page.waitForResponse(res => res.url().includes('api/users') && (res.request().method() === 'DELETE' || res.status() === 200));
+    await personnelPage.confirmDelete();
+    const deleteRes = await deleteResPromise;
+    expect(deleteRes.status()).toBe(200);
+
+    Logger.step('Verify', 'Popup đóng lại và bản ghi biến mất hoàn toàn khỏi danh sách');
+    await expect(personnelPage.deleteModal).toBeHidden();
+    await expect(personnelPage.table.locator('tbody')).not.toContainText(testName);
+    await personnelPage.clearSearch();
+  });
+
   // ==========================================
-  // KHỐI 08: NGĂN CHI TIẾT NHÂN SỰ (DETAIL DRAWER)
+  // KHỐI 08: NGĂN CHI TIẾT NHÂN SỰ & HIỂN THỊ DỮ LIỆU (DETAIL DRAWER)
   // ==========================================
   test('TC_NS_024: Mở ngăn chi tiết nhân sự khi nhấn biểu tượng mắt (view) trên dòng', {
     tag: ['@high', '@major']
@@ -458,8 +759,342 @@ test.describe('Module Quản lý Nhân sự - Hệ thống VNTEST LIMS', () => {
     await personnelPage.closeDetail();
   });
 
+  test('TC_NS_031: Kiểm tra bố cục đầy đủ của Drawer Chi tiết: Header, 2 Tab và 4 nút tác vụ chân trang', {
+    tag: ['@normal', '@major']
+  }, async ({ personnelPage }) => {
+    Logger.step(1, 'Nhấn biểu tượng xem chi tiết (mắt) tại dòng đầu tiên');
+    await personnelPage.openDetail(0);
+
+    Logger.step('Verify 1', 'Header Drawer hiển thị đầy đủ Avatar, Tên, Badge trạng thái, Mã NS, Chức vụ, Phòng/ban');
+    await expect(personnelPage.detailAvatar).toBeVisible();
+    await expect(personnelPage.detailTitleName).toBeVisible();
+    await expect(personnelPage.detailStatusBadge).toBeVisible();
+    await expect(personnelPage.detailMetaCode).toContainText(/NS-/i);
+    await expect(personnelPage.detailHeaderCloseButton).toBeVisible();
+
+    Logger.step('Verify 2', 'Thanh điều hướng hiển thị đủ 2 tab: "Thông tin" và "Lịch sử"');
+    await expect(personnelPage.detailInfoTab).toBeVisible();
+    await expect(personnelPage.detailInfoTab).toHaveClass(/active/);
+    await expect(personnelPage.detailHistoryTab).toBeVisible();
+
+    Logger.step('Verify 3', 'Chân Drawer (Footer) hiển thị đầy đủ 4 nút tác vụ');
+    await expect(personnelPage.detailDeleteButton).toBeVisible();
+    await expect(personnelPage.detailResetPasswordButton).toBeVisible();
+    await expect(personnelPage.detailEditButton).toBeVisible();
+    await expect(personnelPage.detailFooterCloseButton).toBeVisible();
+
+    Logger.step('Teardown', 'Đóng Drawer bằng nút "Đóng" ở chân trang');
+    await personnelPage.detailFooterCloseButton.click();
+    await expect(personnelPage.detailDrawer).not.toHaveClass(/open/);
+  });
+
+  test('TC_NS_032: Kiểm tra chuyển đổi qua lại giữa Tab "Thông tin" và Tab "Lịch sử" trong Drawer', {
+    tag: ['@normal', '@major']
+  }, async ({ personnelPage }) => {
+    Logger.step(1, 'Mở Drawer chi tiết nhân sự');
+    await personnelPage.openDetail(0);
+    await expect(personnelPage.detailInfoTab).toHaveClass(/active/);
+
+    Logger.step(2, 'Nhấn chọn Tab "Lịch sử"');
+    await personnelPage.switchToHistoryTab();
+
+    Logger.step('Verify 1', 'Tab "Lịch sử" ở trạng thái active và hiển thị 2 khối: Lịch sử chức vụ & Lịch sử thay đổi thông tin');
+    await expect(personnelPage.detailHistoryTab).toHaveClass(/active/);
+    await expect(personnelPage.detailPositionHistorySec).toBeVisible();
+    await expect(personnelPage.detailInfoHistorySec).toBeVisible();
+
+    Logger.step(3, 'Nhấn chọn lại Tab "Thông tin"');
+    await personnelPage.switchToInfoTab();
+
+    Logger.step('Verify 2', 'Tab "Thông tin" kích hoạt trở lại và hiển thị nội dung hồ sơ nhân sự');
+    await expect(personnelPage.detailInfoTab).toHaveClass(/active/);
+    await expect(personnelPage.detailInfoBody).toBeVisible();
+
+    Logger.step('Teardown', 'Đóng Drawer');
+    await personnelPage.closeDetail();
+  });
+
+  test('TC_NS_041: Kiểm tra hiển thị dấu gạch ngang "—" cho toàn bộ các trường để trống trong Drawer', {
+    tag: ['@high', '@major']
+  }, async ({ personnelPage, page }) => {
+    const ts = Date.now().toString().slice(-6);
+    const testName = `QA Empty ${ts}`;
+    const testEmail = `qaempty${ts}@vntest.vn`;
+    const testCccd = `001208${ts}`;
+    const testPhone = `0987${ts}`;
+
+    Logger.step('Setup', 'Tạo 1 nhân sự test chỉ điền các trường bắt buộc');
+    await personnelPage.openAddModal();
+    await personnelPage.fillAddPersonnelForm({
+      name: testName,
+      email: testEmail,
+      gender: 'male',
+      citizenId: testCccd,
+      phone: testPhone,
+      department: '1',
+      position: 'Kỹ thuật viên',
+      contractType: 'fixed_term',
+      status: 'working'
+    });
+    const createResPromise = page.waitForResponse(res => res.url().includes('api/users') && res.request().method() === 'POST');
+    await personnelPage.submitAddForm();
+    await createResPromise;
+    await expect(personnelPage.addModal).toBeHidden();
+
+    Logger.step(1, 'Tìm kiếm nhân sự test vừa tạo và mở Drawer Chi tiết');
+    await personnelPage.search(testName);
+    const row = personnelPage.rows.first();
+    await row.locator('button.px-view-button, button:has(svg.lucide-eye)').click();
+    await page.waitForSelector('.ns-detail-drawer.open', { timeout: 10000 });
+
+    Logger.step('Verify', 'Các trường không bắt buộc đều hiển thị ký tự gạch ngang "—"');
+    const emptyFields = [
+      'Ngày cấp',
+      'Nơi cấp',
+      'Số điện thoại do VNTEST cấp',
+      'Địa chỉ thường trú',
+      'Số tài khoản',
+      'Ngân hàng',
+      'Số điện thoại người thân',
+      'Quan hệ',
+      'Kiêm nhiệm',
+      'Ngày thử việc',
+      'Ngày vào chính thức',
+      'Ngày chấm dứt hợp đồng',
+      'Chuyên ngành',
+      'Mã số BHXH',
+      'Mã số thuế cá nhân',
+      'Mã BHYT'
+    ];
+    for (const field of emptyFields) {
+      const val = await personnelPage.getDetailFieldValue(field);
+      expect(val).toBe('—');
+    }
+
+    Logger.step('Teardown', 'Đóng Drawer và xóa nhân sự test');
+    await personnelPage.closeDetail();
+    await row.locator('input[type="checkbox"]').check();
+    await personnelPage.openDeleteModal();
+    const deleteResPromise = page.waitForResponse(res => res.url().includes('api/users') && (res.request().method() === 'DELETE' || res.status() === 200));
+    await personnelPage.confirmDelete();
+    await deleteResPromise;
+    await expect(personnelPage.deleteModal).toBeHidden();
+    await personnelPage.clearSearch();
+  });
+
+  test('TC_NS_042: Kiểm tra hiển thị đầy đủ và chính xác tất cả các trường khi có dữ liệu trong Drawer', {
+    tag: ['@high', '@major']
+  }, async ({ personnelPage, page }) => {
+    const ts = Date.now().toString().slice(-6);
+    const testName = `QA Full ${ts}`;
+    const testEmail = `qafull${ts}@vntest.vn`;
+    const testCccd = `001209${ts}`;
+    const testPhone = `0988${ts}`;
+    const companyPhone = `0243${ts}`;
+    const address = `123 Phố Test, Hà Nội`;
+    const bankAccount = `1903345${ts}`;
+    const bankName = `Techcombank`;
+    const emergencyPhone = `0912${ts}`;
+    const emergencyRelation = `Mẹ`;
+    const concurrentPos = `Phó phòng`;
+    const socialInsurance = `BH${ts}`;
+    const specialty = `Hóa phân tích`;
+
+    Logger.step('Setup', 'Tạo 1 nhân sự test điền đầy đủ cả trường bắt buộc và trường tùy chọn');
+    await personnelPage.openAddModal();
+    await personnelPage.fillAddPersonnelForm({
+      name: testName,
+      email: testEmail,
+      gender: 'female',
+      citizenId: testCccd,
+      phone: testPhone,
+      department: '1',
+      position: 'Kiểm nghiệm viên',
+      contractType: 'fixed_term',
+      status: 'working',
+      companyPhone,
+      permanentAddress: address,
+      bankAccount,
+      bankName,
+      emergencyPhone,
+      emergencyRelation,
+      concurrentPosition: concurrentPos,
+      socialInsurance,
+      specialty
+    });
+    const createResPromise = page.waitForResponse(res => res.url().includes('api/users') && res.request().method() === 'POST');
+    await personnelPage.submitAddForm();
+    await createResPromise;
+    await expect(personnelPage.addModal).toBeHidden();
+
+    Logger.step(1, 'Tìm kiếm nhân sự test vừa tạo và mở Drawer Chi tiết');
+    await personnelPage.search(testName);
+    const row = personnelPage.rows.first();
+    await row.locator('button.px-view-button, button:has(svg.lucide-eye)').click();
+    await page.waitForSelector('.ns-detail-drawer.open', { timeout: 10000 });
+
+    Logger.step('Verify', 'Các trường dữ liệu đều hiển thị đúng giá trị đã nhập');
+    expect(await personnelPage.getDetailFieldValue('Họ và tên')).toBe(testName);
+    expect(await personnelPage.getDetailFieldValue('Giới tính')).toBe('Nữ');
+    expect(await personnelPage.getDetailFieldValue('Số điện thoại do VNTEST cấp')).toBe(companyPhone);
+    expect(await personnelPage.getDetailFieldValue('Địa chỉ thường trú')).toBe(address);
+    expect(await personnelPage.getDetailFieldValue('Số tài khoản')).toBe(bankAccount);
+    expect(await personnelPage.getDetailFieldValue('Ngân hàng')).toBe(bankName);
+    expect(await personnelPage.getDetailFieldValue('Số điện thoại người thân')).toBe(emergencyPhone);
+    expect(await personnelPage.getDetailFieldValue('Quan hệ')).toBe(emergencyRelation);
+    expect(await personnelPage.getDetailFieldValue('Kiêm nhiệm')).toBe(concurrentPos);
+    expect(await personnelPage.getDetailFieldValue('Mã số BHXH')).toBe(socialInsurance);
+    expect(await personnelPage.getDetailFieldValue('Chuyên ngành')).toBe(specialty);
+
+    Logger.step('Teardown', 'Đóng Drawer và xóa nhân sự test');
+    await personnelPage.closeDetail();
+    await row.locator('input[type="checkbox"]').check();
+    await personnelPage.openDeleteModal();
+    const deleteResPromise = page.waitForResponse(res => res.url().includes('api/users') && (res.request().method() === 'DELETE' || res.status() === 200));
+    await personnelPage.confirmDelete();
+    await deleteResPromise;
+    await expect(personnelPage.deleteModal).toBeHidden();
+    await personnelPage.clearSearch();
+  });
+
   // ==========================================
-  // KHỐI 09: TÌM KIẾM & BỘ LỌC DANH SÁCH
+  // KHỐI 09: TAB LỊCH SỬ & NHẬT KÝ KIỂM TOÁN (AUDIT LOG)
+  // ==========================================
+  test('TC_NS_033: Cập nhật thông tin nhân sự và kiểm tra ghi nhận tại Tab "Lịch sử"', {
+    tag: ['@high', '@critical']
+  }, async ({ personnelPage, page }) => {
+    const ts = Date.now().toString().slice(-6);
+    const testName = `QA Log ${ts}`;
+    const testEmail = `qalog${ts}@vntest.vn`;
+    const testCccd = `001210${ts}`;
+    const testPhone = `0971${ts}`;
+    const updatedPhone = `0972${ts}`;
+
+    Logger.step('Setup', 'Tạo 1 nhân sự test để chuẩn bị sửa thông tin');
+    await personnelPage.openAddModal();
+    await personnelPage.fillAddPersonnelForm({
+      name: testName,
+      email: testEmail,
+      gender: 'male',
+      citizenId: testCccd,
+      phone: testPhone,
+      department: '1',
+      position: 'Kỹ thuật viên',
+      contractType: 'fixed_term',
+      status: 'working'
+    });
+    const createResPromise = page.waitForResponse(res => res.url().includes('api/users') && res.request().method() === 'POST');
+    await personnelPage.submitAddForm();
+    await createResPromise;
+
+    Logger.step(1, 'Tìm kiếm nhân sự test và cập nhật số điện thoại cá nhân mới');
+    await personnelPage.search(testName);
+    const row = personnelPage.rows.first();
+    await row.locator('input[type="checkbox"]').check();
+    await personnelPage.openEditModal();
+    await personnelPage.fillEditPersonnelForm({ phone: updatedPhone });
+    const updateResPromise = page.waitForResponse(res => res.url().includes('api/users/') && res.request().method() === 'POST');
+    await personnelPage.submitEditForm();
+    await updateResPromise;
+
+    Logger.step('Verify 1', 'Số điện thoại mới hiển thị cập nhật ngay trên dòng danh sách');
+    await expect(row).toContainText(updatedPhone);
+
+    Logger.step(2, 'Mở Drawer Chi tiết nhân sự');
+    await row.locator('button.px-view-button, button:has(svg.lucide-eye)').click();
+    await page.waitForSelector('.ns-detail-drawer.open', { timeout: 10000 });
+
+    Logger.step('Verify 2', 'Tab "Thông tin" hiển thị đúng Số điện thoại cá nhân mới');
+    expect(await personnelPage.getDetailFieldValue('Số điện thoại cá nhân')).toBe(updatedPhone);
+
+    Logger.step(3, 'Chuyển sang Tab "Lịch sử"');
+    await personnelPage.switchToHistoryTab();
+
+    Logger.step('Verify 3', 'Tab "Lịch sử" ghi nhận sự kiện cập nhật của tài khoản Admin User');
+    await expect(personnelPage.detailInfoHistorySec).toContainText('Admin User');
+
+    Logger.step('Teardown', 'Đóng Drawer và xóa nhân sự test');
+    await personnelPage.closeDetail();
+    if (!await row.locator('input[type="checkbox"]').isChecked()) {
+      await row.locator('input[type="checkbox"]').check();
+    }
+    await personnelPage.openDeleteModal();
+    const deleteResPromise = page.waitForResponse(res => res.url().includes('api/users') && (res.request().method() === 'DELETE' || res.status() === 200));
+    await personnelPage.confirmDelete();
+    await deleteResPromise;
+    await personnelPage.clearSearch();
+  });
+
+  test('TC_NS_034: Thay đổi chức vụ kèm lý do giải trình và kiểm tra ghi nhận chính xác tại khối "Lịch sử chức vụ"', {
+    tag: ['@high', '@critical']
+  }, async ({ personnelPage, page }) => {
+    const ts = Date.now().toString().slice(-6);
+    const testName = `QA Role ${ts}`;
+    const testEmail = `qarole${ts}@vntest.vn`;
+    const testCccd = `001211${ts}`;
+    const testPhone = `0973${ts}`;
+    const initialPosition = 'Kiểm nghiệm viên';
+    const newPosition = 'Kỹ thuật viên cao cấp';
+    const roleReason = `Thăng chức định kỳ đợt ${ts}`;
+
+    Logger.step('Setup', 'Tạo 1 nhân sự test với chức vụ ban đầu là "Kiểm nghiệm viên"');
+    await personnelPage.openAddModal();
+    await personnelPage.fillAddPersonnelForm({
+      name: testName,
+      email: testEmail,
+      gender: 'male',
+      citizenId: testCccd,
+      phone: testPhone,
+      department: '1',
+      position: initialPosition,
+      contractType: 'fixed_term',
+      status: 'working'
+    });
+    const createResPromise = page.waitForResponse(res => res.url().includes('api/users') && res.request().method() === 'POST');
+    await personnelPage.submitAddForm();
+    await createResPromise;
+
+    Logger.step(1, 'Tìm kiếm nhân sự test và mở hộp thoại Chỉnh sửa');
+    await personnelPage.search(testName);
+    const row = personnelPage.rows.first();
+    await row.locator('input[type="checkbox"]').check();
+    await personnelPage.openEditModal();
+
+    Logger.step(2, 'Đổi Chức vụ sang mới và nhập Lý do chỉnh sửa chức vụ');
+    await personnelPage.fillEditPersonnelForm({
+      position: newPosition,
+      positionChangeReason: roleReason
+    });
+    const updateResPromise = page.waitForResponse(res => res.url().includes('api/users/') && res.request().method() === 'POST');
+    await personnelPage.submitEditForm();
+    await updateResPromise;
+
+    Logger.step('Verify 1', 'Màn hình danh sách cập nhật ngay Chức vụ mới');
+    await expect(row).toContainText(newPosition);
+
+    Logger.step(3, 'Mở Drawer Chi tiết nhân sự và chuyển sang Tab "Lịch sử"');
+    await row.locator('button.px-view-button, button:has(svg.lucide-eye)').click();
+    await page.waitForSelector('.ns-detail-drawer.open', { timeout: 10000 });
+    await personnelPage.switchToHistoryTab();
+
+    Logger.step('Verify 2', 'Khối "Lịch sử chức vụ" ghi nhận chức vụ mới và lý do giải trình');
+    await expect(personnelPage.detailPositionHistorySec).toContainText(newPosition);
+    await expect(personnelPage.detailPositionHistorySec).toContainText(roleReason);
+
+    Logger.step('Teardown', 'Đóng Drawer và xóa nhân sự test');
+    await personnelPage.closeDetail();
+    if (!await row.locator('input[type="checkbox"]').isChecked()) {
+      await row.locator('input[type="checkbox"]').check();
+    }
+    await personnelPage.openDeleteModal();
+    const deleteResPromise = page.waitForResponse(res => res.url().includes('api/users') && (res.request().method() === 'DELETE' || res.status() === 200));
+    await personnelPage.confirmDelete();
+    await deleteResPromise;
+    await personnelPage.clearSearch();
+  });
+
+  // ==========================================
+  // KHỐI 10: TÌM KIẾM & BỘ LỌC DANH SÁCH (SEARCH & STATUS FILTER)
   // ==========================================
   test('TC_NS_025: Nhập từ khóa tìm kiếm nhân sự và kiểm tra kích hoạt nút "Hủy"', {
     tag: ['@normal', '@major']
@@ -494,8 +1129,109 @@ test.describe('Module Quản lý Nhân sự - Hệ thống VNTEST LIMS', () => {
     await expect(personnelPage.deptAllChip).toHaveClass(/active/);
   });
 
+  test('TC_NS_035: Mở dropdown bộ lọc trạng thái và kiểm tra đầy đủ 6 tùy chọn', {
+    tag: ['@normal', '@major']
+  }, async ({ personnelPage }) => {
+    Logger.step(1, 'Nhấn vào nút dropdown TT: Tất cả');
+    await personnelPage.openStatusFilter();
+
+    Logger.step('Verify', 'Popover mở ra hiển thị đúng 6 tùy chọn trạng thái và tùy chọn "Tất cả" đang active');
+    await expect(personnelPage.statusFilterPopover).toBeVisible();
+    await expect(personnelPage.statusOptions).toHaveCount(6);
+    await expect(personnelPage.statusOptions.filter({ hasText: /^Tất cả$/ })).toHaveClass(/is-active/);
+    await expect(personnelPage.statusOptions.filter({ hasText: /^Thử việc$/ })).toBeVisible();
+    await expect(personnelPage.statusOptions.filter({ hasText: /^Đang làm việc$/ })).toBeVisible();
+    await expect(personnelPage.statusOptions.filter({ hasText: /^Nghỉ phép dài hạn$/ })).toBeVisible();
+    await expect(personnelPage.statusOptions.filter({ hasText: /^Đã nghỉ việc$/ })).toBeVisible();
+    await expect(personnelPage.statusOptions.filter({ hasText: /^Đã chấm dứt HĐLĐ$/ })).toBeVisible();
+
+    Logger.step('Teardown', 'Đóng popover');
+    await personnelPage.statusFilterDropdown.click();
+  });
+
+  test('TC_NS_036: Lọc danh sách nhân sự theo trạng thái "Đang làm việc"', {
+    tag: ['@high', '@major']
+  }, async ({ personnelPage }) => {
+    Logger.step(1, 'Chọn trạng thái "Đang làm việc" trong dropdown lọc');
+    await personnelPage.selectStatusFilter('Đang làm việc');
+
+    Logger.step('Verify', 'Nhãn nút đổi thành "TT: Đang làm việc" và các dòng đều hiển thị badge "Đang làm việc"');
+    await expect(personnelPage.statusFilterDropdown).toContainText('TT: Đang làm việc');
+    const count = await personnelPage.rows.count();
+    if (count > 0) {
+      await expect(personnelPage.rows.first()).toContainText('Đang làm việc');
+    }
+
+    Logger.step('Teardown', 'Khôi phục về trạng thái "Tất cả"');
+    await personnelPage.selectStatusFilter('Tất cả');
+  });
+
+  test('TC_NS_037: Lọc danh sách nhân sự theo trạng thái "Thử việc"', {
+    tag: ['@high', '@major']
+  }, async ({ personnelPage }) => {
+    Logger.step(1, 'Chọn trạng thái "Thử việc" trong dropdown lọc');
+    await personnelPage.selectStatusFilter('Thử việc');
+
+    Logger.step('Verify', 'Nhãn nút đổi thành "TT: Thử việc"');
+    await expect(personnelPage.statusFilterDropdown).toContainText('TT: Thử việc');
+
+    Logger.step('Teardown', 'Khôi phục về trạng thái "Tất cả"');
+    await personnelPage.selectStatusFilter('Tất cả');
+  });
+
+  test('TC_NS_038: Lọc danh sách theo các trạng thái còn lại (Nghỉ phép dài hạn, Đã nghỉ việc, Đã chấm dứt HĐLĐ)', {
+    tag: ['@normal', '@major']
+  }, async ({ personnelPage }) => {
+    Logger.step(1, 'Chọn trạng thái "Nghỉ phép dài hạn"');
+    await personnelPage.selectStatusFilter('Nghỉ phép dài hạn');
+    await expect(personnelPage.statusFilterDropdown).toContainText('TT: Nghỉ phép dài hạn');
+
+    Logger.step(2, 'Chọn trạng thái "Đã nghỉ việc"');
+    await personnelPage.selectStatusFilter('Đã nghỉ việc');
+    await expect(personnelPage.statusFilterDropdown).toContainText('TT: Đã nghỉ việc');
+
+    Logger.step(3, 'Chọn trạng thái "Đã chấm dứt HĐLĐ"');
+    await personnelPage.selectStatusFilter('Đã chấm dứt HĐLĐ');
+    await expect(personnelPage.statusFilterDropdown).toContainText('TT: Đã chấm dứt HĐLĐ');
+
+    Logger.step('Teardown', 'Khôi phục về trạng thái "Tất cả"');
+    await personnelPage.selectStatusFilter('Tất cả');
+  });
+
+  test('TC_NS_039: Chọn lại trạng thái "Tất cả" để khôi phục toàn bộ danh sách nhân sự', {
+    tag: ['@normal', '@major']
+  }, async ({ personnelPage }) => {
+    Logger.step(1, 'Đang từ trạng thái lọc "Đang làm việc" chọn lại "Tất cả"');
+    await personnelPage.selectStatusFilter('Đang làm việc');
+    await expect(personnelPage.statusFilterDropdown).toContainText('TT: Đang làm việc');
+
+    await personnelPage.selectStatusFilter('Tất cả');
+
+    Logger.step('Verify', 'Nút hiển thị lại "TT: Tất cả" và bảng khôi phục đầy đủ nhân sự');
+    await expect(personnelPage.statusFilterDropdown).toContainText('TT: Tất cả');
+    await expect(personnelPage.firstRow).toBeVisible();
+  });
+
+  test('TC_NS_040: Lọc kết hợp đa điều kiện: Chip "Phòng/ban 1" + Trạng thái "Đang làm việc"', {
+    tag: ['@high', '@major']
+  }, async ({ personnelPage }) => {
+    Logger.step(1, 'Nhấn chọn chip "Phòng/ban 1"');
+    await personnelPage.filterByDepartmentChip('dept1');
+
+    Logger.step(2, 'Chọn trạng thái lọc "Đang làm việc"');
+    await personnelPage.selectStatusFilter('Đang làm việc');
+
+    Logger.step('Verify', 'Cả chip Phòng/ban 1 active và nút hiển thị "TT: Đang làm việc"');
+    await expect(personnelPage.dept1Chip).toHaveClass(/active/);
+    await expect(personnelPage.statusFilterDropdown).toContainText('TT: Đang làm việc');
+
+    Logger.step('Teardown', 'Khôi phục chip Tất cả và trạng thái Tất cả');
+    await personnelPage.filterByDepartmentChip('all');
+    await personnelPage.selectStatusFilter('Tất cả');
+  });
+
   // ==========================================
-  // KHỐI 10: QUẢN LÝ CỘT (MANAGE COLUMNS)
+  // KHỐI 11: QUẢN LÝ CỘT (MANAGE COLUMNS)
   // ==========================================
   test('TC_NS_027: Mở popover "Quản lý cột" từ nút ở chân bảng', {
     tag: ['@normal', '@minor']
@@ -506,4 +1242,69 @@ test.describe('Module Quản lý Nhân sự - Hệ thống VNTEST LIMS', () => {
     Logger.step('Verify', 'Popover quản lý cột hiển thị');
     await expect(personnelPage.manageColumnsPopover).toBeVisible();
   });
+
+  // =========================================================================
+  // KHỐI 12: PHÂN QUYỀN TRUY CẬP (ACCESS CONTROL / RBAC)
+  // (TẠM THỜI COMMENT TOÀN BỘ DO HỆ THỐNG HIỆN TẠI CHƯA TRIỂN KHAI PHÂN QUYỀN)
+  // =========================================================================
+  //
+  // test('TC_NS_RBAC_01: Quyền truy cập - Tài khoản Quản trị viên (Admin) / Quản lý HR có quyền truy cập đầy đủ vào /nhan-su', {
+  //   tag: ['@high', '@critical']
+  // }, async ({ page, personnelPage }) => {
+  //   // TODO: Bật lại khi hệ thống triển khai phân quyền theo vai trò người dùng (RBAC)
+  //   Logger.step(1, 'Đăng nhập bằng tài khoản có quyền Quản trị viên / Quản lý HR');
+  //   // await authPage.login(adminUser.username, adminUser.password);
+  //
+  //   Logger.step(2, 'Điều hướng tới tuyến đường quản lý nhân sự /nhan-su');
+  //   await personnelPage.navigate();
+  //
+  //   Logger.step('Verify', 'Truy cập thành công, tab NHÂN SỰ active và hiển thị đầy đủ danh sách cùng thanh công cụ');
+  //   await expect(personnelPage.headerPersonnelTab).toBeVisible();
+  //   await expect(personnelPage.addPersonnelButton).toBeVisible();
+  //   await expect(personnelPage.table).toBeVisible();
+  // });
+  //
+  // test('TC_NS_RBAC_02: Quyền truy cập - Tài khoản Kỹ thuật viên (KNV / Lab) cố tình truy cập bằng URL trực tiếp bị chặn', {
+  //   tag: ['@high', '@critical']
+  // }, async ({ page }) => {
+  //   // TODO: Bật lại khi hệ thống triển khai phân quyền theo vai trò người dùng (RBAC)
+  //   Logger.step(1, 'Đăng nhập bằng tài khoản Kỹ thuật viên phòng LAB (không có quyền quản lý nhân sự)');
+  //   // await authPage.login(technicianUser.username, technicianUser.password);
+  //
+  //   Logger.step(2, 'Cố tình truy cập trực tiếp bằng đường dẫn URL /nhan-su');
+  //   await page.goto('/nhan-su');
+  //
+  //   Logger.step('Verify', 'Hệ thống chặn truy cập (Hiển thị trang lỗi 403 Forbidden hoặc chuyển hướng về trang chủ /dashboard)');
+  //   // await expect(page).toHaveURL(/\/(dashboard|403|access-denied)/);
+  //   // await expect(page.locator('.forbidden-message, .error-content')).toContainText(/không có quyền|403|truy cập bị từ chối/i);
+  // });
+  //
+  // test('TC_NS_RBAC_03: Quyền truy cập - Tài khoản Nhân viên kinh doanh (Sale) cố tình truy cập bằng URL trực tiếp bị chặn', {
+  //   tag: ['@high', '@critical']
+  // }, async ({ page }) => {
+  //   // TODO: Bật lại khi hệ thống triển khai phân quyền theo vai trò người dùng (RBAC)
+  //   Logger.step(1, 'Đăng nhập bằng tài khoản Nhân viên kinh doanh thông thường');
+  //   // await authPage.login(salesUser.username, salesUser.password);
+  //
+  //   Logger.step(2, 'Cố tình truy cập trực tiếp bằng đường dẫn URL /nhan-su');
+  //   await page.goto('/nhan-su');
+  //
+  //   Logger.step('Verify', 'Hệ thống chặn truy cập (Hiển thị trang lỗi 403 Forbidden hoặc chuyển hướng về trang chủ /dashboard)');
+  //   // await expect(page).toHaveURL(/\/(dashboard|403|access-denied)/);
+  //   // await expect(page.locator('.forbidden-message, .error-content')).toContainText(/không có quyền|403|truy cập bị từ chối/i);
+  // });
+  //
+  // test('TC_NS_RBAC_04: Phiên làm việc - Khách chưa đăng nhập cố tình truy cập trực tiếp /nhan-su bị chuyển hướng về /dang-nhap', {
+  //   tag: ['@high', '@critical']
+  // }, async ({ page }) => {
+  //   // TODO: Bật lại khi hệ thống triển khai phân quyền theo vai trò người dùng (RBAC)
+  //   Logger.step(1, 'Xóa toàn bộ phiên đăng nhập (cookies / local storage / session storage)');
+  //   await page.context().clearCookies();
+  //
+  //   Logger.step(2, 'Cố tình truy cập trực tiếp vào tuyến đường bảo vệ /nhan-su');
+  //   await page.goto('/nhan-su');
+  //
+  //   Logger.step('Verify', 'Hệ thống chặn truy cập và tự động chuyển hướng về trang đăng nhập /dang-nhap');
+  //   await expect(page).toHaveURL(/\/dang-nhap/);
+  // });
 });
