@@ -16,7 +16,7 @@ Thư mục này chứa toàn bộ tài liệu đặc tả các luồng kiểm th
 | 06 | **HO_SO_TN** | Hồ sơ TN / Nhật ký thử nghiệm | [06_ho_so_tn.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/06_ho_so_tn.md) | 24 | ✅ Đã hoàn thành |
 | 07 | **TRUONG_BP** | Trưởng BP Kiểm tra | [07_truong_bp_ktra.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/07_truong_bp_ktra.md) | 25 | ✅ Đã hoàn thành |
 | 08 | **RA_SOAT_KQ** | Rà soát kết quả | [08_ra_soat_kq.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/08_ra_soat_kq.md) | 116 | ✅ Đã hoàn thành |
-| 09 | **DUYET_PKQ** | Duyệt Phiếu Kết Quả | `09_duyet_pkq.md` | 48 | ⏳ Chờ duyệt mẫu 01 |
+| 09 | **DUYET_PKQ** | Duyệt Phiếu Kết Quả | [09_duyet_pkq.md](file:///home/thai.hoang.dinh/VNTEST_Automation/docs/09_duyet_pkq.md) | 48 | ✅ Đã hoàn thành |
 | 10 | **DK_SCAN** | Đính kèm Scan | `10_dinh_kem_scan.md` | 57 | ⏳ Chờ duyệt mẫu 01 |
 | 11 | **CUSTOMERS** | Quản lý Khách hàng | `11_customers.md` | 41 | ⏳ Chờ duyệt mẫu 01 |
 | 12 | **LEADS** | Quản lý Lead / Cơ hội | `12_leads.md` | 17 | ⏳ Chờ duyệt mẫu 01 |
