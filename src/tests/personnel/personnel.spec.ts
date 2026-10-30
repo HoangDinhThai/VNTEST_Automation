@@ -237,6 +237,57 @@ test.describe('Module Quản lý Nhân sự - Hệ thống VNTEST LIMS', () => {
     await personnelPage.cancelAddModal();
   });
 
+  test('TC_NS_015: Thêm mới nhân sự thành công khi điền đầy đủ và hợp lệ các trường bắt buộc', {
+    tag: ['@high', '@critical']
+  }, async ({ personnelPage, page }) => {
+    const ts = Date.now().toString().slice(-6);
+    const testName = `QA Auto ${ts}`;
+    const testEmail = `qa${ts}@vntest.vn`;
+    const testCccd = `001203${ts}`;
+    const testPhone = `0981${ts}`;
+
+    Logger.step(1, 'Nhấn nút "Thêm" để mở hộp thoại thêm mới nhân sự');
+    await personnelPage.openAddModal();
+    await expect(personnelPage.addModal).toBeVisible();
+
+    Logger.step(2, 'Điền đầy đủ và hợp lệ toàn bộ các trường bắt buộc');
+    await personnelPage.fillAddPersonnelForm({
+      name: testName,
+      email: testEmail,
+      gender: 'male',
+      citizenId: testCccd,
+      phone: testPhone,
+      department: '1',
+      position: 'Kiểm nghiệm viên',
+      contractType: 'fixed_term',
+      status: 'working'
+    });
+
+    Logger.step(3, 'Nhấn nút "Lưu" để tạo mới nhân sự');
+    const createResPromise = page.waitForResponse(res => res.url().includes('api/users') && res.request().method() === 'POST');
+    await personnelPage.submitAddForm();
+    const createRes = await createResPromise;
+    expect(createRes.status()).toBe(201);
+
+    Logger.step('Verify', 'Hộp thoại đóng và bản ghi mới hiển thị trên danh sách kèm mã NS tự sinh');
+    await expect(personnelPage.addModal).toBeHidden({ timeout: 8000 });
+
+    await personnelPage.search(testName);
+    const row = personnelPage.rows.first();
+    await expect(row).toContainText(testName);
+    await expect(row).toContainText(testEmail);
+    await expect(row).toContainText(/NS-/i);
+
+    Logger.step('Teardown', 'Dọn dẹp: Xóa nhân sự test vừa tạo');
+    await row.locator('input[type="checkbox"]').check();
+    await personnelPage.openDeleteModal();
+    const deleteResPromise = page.waitForResponse(res => res.request().method() === 'DELETE' || (res.request().method() === 'POST' && res.url().includes('delete')));
+    await personnelPage.confirmDelete();
+    await deleteResPromise;
+    await expect(personnelPage.deleteModal).toBeHidden();
+    await personnelPage.clearSearch();
+  });
+
   // ==========================================
   // KHỐI 05: HỘP THOẠI CHỈNH SỬA NHÂN SỰ
   // ==========================================

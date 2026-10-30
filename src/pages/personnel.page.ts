@@ -225,7 +225,7 @@ export class PersonnelPage extends BasePage {
     // Detail Drawer
     this.detailDrawer = page.locator('aside.detail-panel.ns-detail-drawer').first();
     this.detailDrawerContent = page.locator('.ns-detail-info-body').first();
-    this.detailDrawerCloseButton = page.locator('.ns-detail-drawer button.modal-close, .ns-detail-drawer button[aria-label="Đóng"]').first();
+    this.detailDrawerCloseButton = page.locator('.ns-detail-drawer button.dp-close, .ns-detail-drawer button.modal-close, .ns-detail-drawer button[aria-label="Đóng"], .ns-detail-drawer footer button:has-text("Đóng")').first();
   }
 
   /**
@@ -404,6 +404,105 @@ export class PersonnelPage extends BasePage {
   async openManageColumns(): Promise<void> {
     Logger.info('Nhấn nút "Quản lý cột"');
     await this.manageColumnsButton.click();
+  }
+
+  /**
+   * Chọn ngày sinh là Hôm nay thông qua custom datepicker
+   */
+  async selectDateOfBirthToday(): Promise<void> {
+    Logger.info('Chọn ngày sinh là Hôm nay qua custom datepicker');
+    await this.dobTrigger.click();
+    const todayBtn = this.page.locator('.popover__panel .date-calendar__foot-btn--primary').filter({ hasText: /hôm nay/i }).first();
+    await todayBtn.click();
+  }
+
+  /**
+   * Điền thông tin form Thêm mới nhân sự
+   */
+  async fillAddPersonnelForm(data: {
+    name: string;
+    email: string;
+    gender?: 'male' | 'female' | 'other';
+    citizenId: string;
+    phone: string;
+    department?: string;
+    position: string;
+    contractType?: 'probation' | 'fixed_term' | 'indefinite';
+    status?: 'probation' | 'working' | 'long_leave' | 'resigned' | 'contract_terminated';
+  }): Promise<void> {
+    Logger.info(`Điền thông tin thêm nhân sự: ${data.name} - ${data.email}`);
+    await this.nameInput.fill(data.name);
+    await this.emailInput.fill(data.email);
+    if (data.gender) {
+      await this.genderSelect.selectOption(data.gender);
+    }
+    await this.selectDateOfBirthToday();
+    await this.citizenIdInput.fill(data.citizenId);
+    await this.personalPhoneInput.fill(data.phone);
+    if (data.department) {
+      await this.departmentSelect.selectOption(data.department);
+    } else {
+      await this.departmentSelect.selectOption('1');
+    }
+    await this.positionInput.fill(data.position);
+    if (data.contractType) {
+      await this.contractTypeSelect.selectOption(data.contractType);
+    } else {
+      await this.contractTypeSelect.selectOption('fixed_term');
+    }
+    if (data.status) {
+      await this.statusSelect.selectOption(data.status);
+    } else {
+      await this.statusSelect.selectOption('working');
+    }
+  }
+
+  /**
+   * Điền thông tin chỉnh sửa nhân sự
+   */
+  async fillEditPersonnelForm(data: {
+    name?: string;
+    phone?: string;
+    position?: string;
+    positionChangeReason?: string;
+  }): Promise<void> {
+    Logger.info('Điền thông tin chỉnh sửa nhân sự');
+    if (data.name) {
+      await this.nameInput.fill(data.name);
+    }
+    if (data.phone) {
+      await this.personalPhoneInput.fill(data.phone);
+    }
+    if (data.position) {
+      await this.positionInput.fill(data.position);
+      if (data.positionChangeReason) {
+        await this.editPositionReasonInput.fill(data.positionChangeReason);
+      }
+    }
+  }
+
+  /**
+   * Nhấn nút Lưu trên form Chỉnh sửa
+   */
+  async submitEditForm(): Promise<void> {
+    Logger.info('Nhấn nút "Lưu" trên form chỉnh sửa');
+    await this.editModalSaveButton.click();
+  }
+
+  /**
+   * Xác nhận đặt lại mật khẩu trong hộp thoại
+   */
+  async confirmResetPassword(): Promise<void> {
+    Logger.info('Nhấn nút "Đặt lại mật khẩu" trong hộp thoại xác nhận');
+    await this.resetPasswordModalConfirmButton.click();
+  }
+
+  /**
+   * Xác nhận xóa nhân sự trong hộp thoại
+   */
+  async confirmDelete(): Promise<void> {
+    Logger.info('Nhấn nút "Xóa" trong hộp thoại xác nhận');
+    await this.deleteModalConfirmButton.click();
   }
 }
 
