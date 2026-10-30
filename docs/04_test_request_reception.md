@@ -19,7 +19,7 @@
 ---
 
 ## 📑 MỤC LỤC ĐIỀU HƯỚNG NHANH
-1. [1. Định vị màn hình & Tổng quan tính năng (Overview & UI Wireframe)](#1-định-vị-màn-hình--tổng-quan-tính-năng-overview--ui-wireframe)
+1. [1. Định vị màn hình & Tổng quan tính năng (Overview & UI Layout)](#1-định-vị-màn-hình--tổng-quan-tính-năng-overview--ui-layout)
 2. [2. Sơ đồ phân tích luồng trực quan (Mermaid Flowcharts)](#2-sơ-đồ-phân-tích-luồng-trực-quan-mermaid-flowcharts)
 3. [3. Phân quyền & Điều kiện kích hoạt (Access & Permissions)](#3-phân-quyền--điều-kiện-kích-hoạt-access--permissions)
 4. [4. Đặc tả chi tiết các Use Cases chức năng (Functional Use Cases)](#4-đặc-tả-chi-tiết-các-use-cases-chức-năng-functional-use-cases)
@@ -38,31 +38,28 @@
 * **Luồng Yêu cầu bổ sung (YCTN BS):** Cho phép bộ phận tiếp nhận gửi trả yêu cầu kèm lý do bắt buộc để nhân viên kinh doanh bổ sung thông tin khi hồ sơ chưa đạt chuẩn.
 * **Quản lý Thông tin nội bộ & Tính ngày hẹn trả:** Cấu hình Số ngày kiểm, Số ngày trả sớm để hệ thống tự động tính Ngày hẹn trả khách hàng và Ngày hẹn trả kết quả phân tích nội bộ.
 
-### 1.2. Sơ đồ Wireframe Bố cục Giao diện (ASCII Text Wireframe)
+### 1.2. Bố cục Giao diện & Các Phân khu Chức năng (UI Layout Matrix)
 
-```text
-+-----------------------------------------------------------------------------------------------------------------------+
-|  [ BG & YCTN ]     [ TIẾP NHẬN YCTN (Active) ]                                                [ Xuất ]   [ In ]       |
-+-----------------------------------------------------------------------------------------------------------------------+
-|  CHIPS: (• Tất cả)  ( YCTN CD )  ( YCTN BS )  ( YCTN DD )  ( Chưa Attach )                                            |
-|  BỘ LỌC: [Lọc Ngày: Ngày nhận v] [Từ] [Đến]  |  Ô tìm kiếm: [ Nhập mã BG, mã YCTN, khách hàng...               [x] ]  |
-|  TOOLBAR: [ Duyệt ]   [ Yêu cầu BS ]   [ Sửa ]   [ Tệp đính kèm ]                                                     |
-+-----------------------------------------------------------+-----------------------------------------------------------+
-|  KHUNG TRÁI: BẢNG TIẾP NHẬN YCTN (CỘT 2 TẦNG)            |  KHUNG PHẢI: CHI TIẾT HỒ SƠ TIẾP NHẬN (8 PHẦN THÔNG TIN)  |
-|  [x] | MÃ BG      | MÃ YCTN | KHÁCH HÀNG        | TRẠNG THÁI  |  1. Thông tin chung & Khách hàng                          |
-|  [ ] | BG-2610-01 | TR-001  | Công ty TNHH ABC  | YCTN DD     |  2. Thông tin xuất hóa đơn                                |
-|  [ ] | BG-2610-02 | ---     | Thái test         | YCTN CD     |  3. Dịch vụ bổ sung                                       |
-|  [ ] | BG-2610-03 | ---     | Nguyễn Văn An     | YCTN BS     |  4. Điều khoản thương mại & thanh toán                    |
-|                                                           |  5. Danh sách Nền mẫu & Chỉ tiêu phân tích                |
-|                                                           |  6. THÔNG TIN NỘI BỘ (Chỉnh sửa ngày & tiến độ):          |
-|                                                           |     Số ngày kiểm: [ 3 ]   Số ngày trả sớm: [ 1 ]          |
-|                                                           |     => Ngày hẹn trả: 28/10/2026                           |
-|                                                           |     => Ngày hẹn trả PT: 27/10/2026                        |
-|                                                           |  7. Tổng chi phí dịch vụ                                  |
-|                                                           |  8. Lịch sử xử lý & Ghi chú tiếp nhận                     |
-|  Hiển thị 1 - 20 / 45  | Trang [ 1 ] 2 .. | [ Quản lý cột v] |  [ Lưu ]   [ Huỷ ]                                        |
-+-----------------------------------------------------------+-----------------------------------------------------------+
+```mermaid
+flowchart TD
+    subgraph UI_Layout ["🖥️ BỐ CỤC MÀN HÌNH TIẾP NHẬN YCTN (/tiep-nhan-yctn)"]
+        direction TB
+        Header["1. Thanh điều hướng Tab Header: [BG & YCTN] · [TIẾP NHẬN YCTN] (Active)"]
+        Toolbar["2. Thanh công cụ Toolbar: [Duyệt] · [Yêu cầu BS] · [Sửa] · [Tệp đính kèm]"]
+        Filters["3. Chip trạng thái & Bộ lọc: (• Tất cả) (YCTN CD) (YCTN BS) (YCTN DD) (Chưa Attach) · Lọc ngày · Ô tìm kiếm"]
+        SplitView["4. Cấu trúc 2 Khung: Bảng danh sách tiêu đề 2 tầng (Trái) ⮂ Chi tiết hồ sơ 8 khối thông tin (Phải)"]
+        
+        Header --> Toolbar --> Filters --> SplitView
+    end
 ```
+
+| Phân khu (Section) | Vị trí hiển thị | Thành phần giao diện chính | Mục đích & Nghiệp vụ |
+| :--- | :--- | :--- | :--- |
+| **1. Header Tabs** | Trên cùng trang | Cụm tab: `BG & YCTN`, `TIẾP NHẬN YCTN` (active), nút `Xuất`, `In` | Điều hướng qua lại giữa phân hệ Báo giá và Tiếp nhận mẫu |
+| **2. Thanh công cụ (Toolbar)** | Dưới Header | Nút `"Duyệt"`, `"Yêu cầu BS"`, `"Sửa"`, `"Tệp đính kèm"` | Thao tác phê duyệt tiếp nhận, yêu cầu bổ sung hoặc chỉnh sửa |
+| **3. Chip trạng thái & Bộ lọc** | Dưới Toolbar | 5 Chip trạng thái, dropdown loại ngày, ô Từ ngày/Đến ngày, ô tìm kiếm | Lọc nhanh hồ sơ theo tình trạng kiểm duyệt và hạn trả kết quả |
+| **4. Bảng danh sách (Khung trái)**| Nửa bên trái | Bảng tiêu đề ghép 2 tầng: Mã BG, Mã TR, Khách hàng, Ngày nhận/trả, Trạng thái | Hiển thị danh sách tổng quan các hồ sơ YCTN cần tiếp nhận |
+| **5. Khung Chi tiết (Khung phải)**| Nửa bên phải | 8 Khối: Thông tin chung, Hóa đơn, DV bổ sung, Thanh toán, Mẫu/Chỉ tiêu, **Thông tin nội bộ**, Chi phí, Lịch sử | Xem chi tiết, cấu hình Số ngày kiểm/trả sớm để tự động tính ngày hẹn |
 
 ---
 

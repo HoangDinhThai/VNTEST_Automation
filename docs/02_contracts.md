@@ -19,7 +19,7 @@
 ---
 
 ## 📑 MỤC LỤC ĐIỀU HƯỚNG NHANH
-1. [1. Định vị màn hình & Tổng quan tính năng (Overview & UI Wireframe)](#1-định-vị-màn-hình--tổng-quan-tính-năng-overview--ui-wireframe)
+1. [1. Định vị màn hình & Tổng quan tính năng (Overview & UI Layout)](#1-định-vị-màn-hình--tổng-quan-tính-năng-overview--ui-layout)
 2. [2. Sơ đồ phân tích luồng trực quan (Mermaid Flowcharts)](#2-sơ-đồ-phân-tích-luồng-trực-quan-mermaid-flowcharts)
 3. [3. Phân quyền & Điều kiện kích hoạt (Access & Permissions)](#3-phân-quyền--điều-kiện-kích-hoạt-access--permissions)
 4. [4. Đặc tả chi tiết các Use Cases chức năng (Functional Use Cases)](#4-đặc-tả-chi-tiết-các-use-cases-chức-năng-functional-use-cases)
@@ -38,35 +38,29 @@
 * **Chuyển đổi kế thừa tự động (Chuyển HĐ ký):** Kế thừa 100% dữ liệu từ bản nháp sang hợp đồng chính thức, tự động đính kèm file Word mềm đã biên soạn, bắt buộc kiểm soát file scan PDF trước khi lưu.
 * **Cơ chế Unsaved Changes Guard:** Cảnh báo người dùng khi vô tình đóng form hoặc nhấp ra ngoài khi dữ liệu đang nhập dở, ngăn chặn tối đa việc mất mát dữ liệu nhập liệu.
 
-### 1.2. Sơ đồ Wireframe Bố cục Giao diện (ASCII Text Wireframe)
+### 1.2. Bố cục Giao diện & Các Phân khu Chức năng (UI Layout Matrix)
 
-```text
-+-----------------------------------------------------------------------------------------------------------------------+
-|  [ KH - ĐT - HĐ ]  >  [ HỢP ĐỒNG (128) ]                                                                             |
-+-----------------------------------------------------------------------------------------------------------------------+
-|  [ Hợp đồng nháp (42) ]    [ Hợp đồng ký (86) ]                                                                       |
-+-----------------------------------------------------------------------------------------------------------------------+
-|  TOOLBAR:                                                                                                             |
-|  [+ Thêm]   [ Sửa ]   [ Xóa ]   [ Chuyển HĐ ký ]  |  [Lọc Ngày: Ngày ký v] [Từ] [Đến]  |  [Loại HĐ v]  | [TT: Tất cả v]   |
-|  Ô tìm kiếm: [ Nhập mã HĐ, số HĐ, tên HĐ, khách hàng...                    [x] ]                                     |
-+-----------------------------------------------------------------------------------------------------------------------+
-|  [x] | MÃ HĐ    | SỐ HỢP ĐỒNG              | LOẠI HĐ     | KHÁCH HÀNG              | NGÀY KÝ    | GIÁ TRỊ SAU VAT | ... |
-|  [ ] | HĐ-00231 | 28.286.001/HĐDV/VNTEST_1 | Dịch vụ     | Công ty TNHH ABC        | 28/10/2026 | 20.000.000 đ    | (👁)|
-|  [ ] | HĐ-00230 | 28.286.002/HĐDV/VNTEST   | Nguyên tắc  | Thái test               | 27/10/2026 | 15.000.000 đ    | (👁)|
-+-----------------------------------------------------------------------------------------------------------------------+
-|  Đang chọn: 1 HĐ  |  Hiển thị 1 - 20 / 128 bản ghi  |  Trang [ 1 ] 2 3 ...  |  [ Quản lý cột v ]                      |
-+-----------------------------------------------------------------------------------------------------------------------+
-|  SLIDE-OVER DETAIL PANEL (Mở từ bên phải khi nhấn icon con mắt 👁):                                                    |
-|  +-----------------------------------------------------------------------------------------------------------------+  |
-|  | [X] CHI TIẾT HỢP ĐỒNG: HĐ-00231 · 28.286.001/HĐDV/VNTEST_1                                    [ Chỉnh sửa ]     |  |
-|  | 1. Thông tin hợp đồng: Loại HĐ: Dịch vụ | Khách hàng: Công ty TNHH ABC | Ngày ký: 28/10/2026                     |  |
-|  | 2. File mềm & Bản scan đính kèm: [File Word] HD-28.docx | [File Scan] hopdong_signed.pdf (OK)                   |  |
-|  | 3. Lịch sử giao dịch của khách hàng:                                                                            |  |
-|  |    - [HĐ-00231] Hợp đồng thử nghiệm mẫu 22 · HD HIỆN TẠI --------------------------------------- 20.000.000 đ    |  |
-|  |    - [HĐ-00190] Hợp đồng nguyên tắc năm 2025 ------------------------------------------------ 50.000.000 đ    |  |
-|  |    => TỔNG GIÁ TRỊ GIAO DỊCH: 70.000.000 đ                                                                      |  |
-+-----------------------------------------------------------------------------------------------------------------------+
+```mermaid
+flowchart TD
+    subgraph UI_Layout ["🖥️ BỐ CỤC MÀN HÌNH QUẢN LÝ HỢP ĐỒNG (/hop-dong)"]
+        direction TB
+        Header["1. Header Tab Module: [KH - ĐT - HĐ] > Tab [HỢP ĐỒNG] (Active)"]
+        Subtabs["2. Cụm Sub-tab: [Hợp đồng nháp] (Soạn thảo) ⮂ [Hợp đồng ký] (Pháp lý & Scan)"]
+        Toolbar["3. Toolbar & Bộ lọc: [+ Thêm] [Sửa] [Xóa] [Chuyển HĐ ký] · Lọc ngày · Lọc loại HĐ · Ô tìm kiếm"]
+        DataTable["4. Bảng danh sách Hợp đồng: Mã HĐ · Số HĐ · Loại HĐ · Khách hàng · Ngày ký · Giá trị sau VAT · Cột Tính DS"]
+        DetailPanel["5. Slide-over Detail Panel: Trượt từ phải sang khi nhấn icon 👁 (Thông tin HĐ, File scan, Lịch sử GD khách hàng)"]
+        
+        Header --> Subtabs --> Toolbar --> DataTable --> DetailPanel
+    end
 ```
+
+| Phân khu (Section) | Vị trí hiển thị | Thành phần giao diện chính | Mục đích & Nghiệp vụ |
+| :--- | :--- | :--- | :--- |
+| **1. Header & Sub-tabs** | Trên cùng màn hình | Tab `HỢP ĐỒNG` (active), 2 Sub-tab: `Hợp đồng nháp` và `Hợp đồng ký` | Phân định rõ 2 giai đoạn: Soạn thảo thỏa thuận và Hợp đồng ký chính thức |
+| **2. Thanh công cụ (Toolbar)** | Dưới Sub-tab | Nút `"Thêm"`, `"Sửa"`, `"Xóa"`, `"Chuyển HĐ ký"` (tại tab Nháp) | Thao tác quản lý bản ghi hợp đồng tương ứng theo trạng thái chọn dòng |
+| **3. Bộ lọc & Tìm kiếm** | Dưới Toolbar | Bộ lọc 3 tiêu chí ngày (Ngày ký, Hết hiệu lực, Ngày hết hạn), lọc 8 loại HĐ, tìm kiếm đa tiêu chí | Tra cứu nhanh hợp đồng theo đối tác, thời hạn và số hiệu văn bản |
+| **4. Bảng danh sách HĐ** | Khu vực trung tâm | Bảng dữ liệu đa cột kèm phân trang, quản lý ẩn/hiện cột và cột `TÍNH DS` readonly | Quan sát tổng thể danh mục hợp đồng của doanh nghiệp |
+| **5. Slide-over Detail Panel** | Ngăn trượt bên phải | Mở khi nhấn icon con mắt 👁: Thông tin pháp lý Bên A, File Word mềm/Scan, Lịch sử GD khách hàng | Tra cứu chi tiết hợp đồng và tổng giá trị giao dịch lũy kế của khách hàng |
 
 ---
 

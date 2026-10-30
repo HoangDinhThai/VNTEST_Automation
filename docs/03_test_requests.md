@@ -19,7 +19,7 @@
 ---
 
 ## 📑 MỤC LỤC ĐIỀU HƯỚNG NHANH
-1. [1. Định vị màn hình & Tổng quan tính năng (Overview & UI Wireframe)](#1-định-vị-màn-hình--tổng-quan-tính-năng-overview--ui-wireframe)
+1. [1. Định vị màn hình & Tổng quan tính năng (Overview & UI Layout)](#1-định-vị-màn-hình--tổng-quan-tính-năng-overview--ui-layout)
 2. [2. Sơ đồ phân tích luồng trực quan (Mermaid Flowcharts)](#2-sơ-đồ-phân-tích-luồng-trực-quan-mermaid-flowcharts)
 3. [3. Phân quyền & Điều kiện kích hoạt (Access & Permissions)](#3-phân-quyền--điều-kiện-kích-hoạt-access--permissions)
 4. [4. Đặc tả chi tiết các Use Cases chức năng (Functional Use Cases)](#4-đặc-tả-chi-tiết-các-use-cases-chức-năng-functional-use-cases)
@@ -38,33 +38,28 @@
 * **Cơ chế tính toán tài chính tự động (Real-time Calculator):** Tự động tính tiền theo đơn giá, số lượng, hệ số kiểm nhanh (+% ↑), chiết khấu thương mại, giá sàn tối thiểu, biên lợi nhuận (Margin) và VAT của từng hạng mục.
 * **Đồng bộ thông minh giữa Hợp đồng & Khách hàng:** Chọn Hợp đồng tự động điền toàn bộ thông tin pháp lý khách hàng ở Phần 1 và Số hợp đồng xuất hóa đơn ở Phần 2; khi xóa hợp đồng bằng nút `[×]` thì thông tin khách hàng vẫn được giữ nguyên vẹn.
 
-### 1.2. Sơ đồ Wireframe Bố cục Giao diện (ASCII Text Wireframe)
+### 1.2. Bố cục Giao diện & Các Phân khu Chức năng (UI Layout Matrix)
 
-```text
-+-----------------------------------------------------------------------------------------------------------------------+
-|  [ BG & YCTN (Active) ]     [ TIẾP NHẬN YCTN ]                                                [ Xuất ]   [ In ]       |
-+-----------------------------------------------------------------------------------------------------------------------+
-|  CHIPS: (• Tất cả)  ( Nháp )  ( KH chốt )  ( YCTN CD )  ( YCTN BS )  ( YCTN DD )  ( YCTN TC )                         |
-|  BỘ LỌC: [Lọc Ngày: Ngày nhận v] [Từ] [Đến]  |  Ô tìm kiếm: [ Nhập mã BG, mã YCTN, khách hàng...               [x] ]  |
-|  TOOLBAR: [ Nhân bản ]  [ KH chốt ]  [ Gửi YCTN ]  [+ Thêm]  [ Sửa ]  [ Xóa ]                                         |
-+-----------------------------------------------------------+-----------------------------------------------------------+
-|  KHUNG TRÁI: BẢNG DANH SÁCH BÁO GIÁ & YCTN                |  KHUNG PHẢI: FORM TẠO MỚI (6 PHẦN) / XEM CHI TIẾT (7 PHẦN)|
-|  [x] | MÃ BG      | MÃ YCTN | KHÁCH HÀNG        | TRẠNG THÁI  |  1. THÔNG TIN CHUNG & KHÁCH HÀNG:                         |
-|  [ ] | BG-2610-01 | TR-001  | Công ty TNHH ABC  | YCTN DD     |     Số HĐ: [ HĐ-00231 · Thái test v ] [x]                |
-|  [ ] | BG-2610-02 | ---     | Thái test         | KH chốt     |     Mã KH: [ KH-0164 ]  Tên: [ Công ty TNHH ABC ]        |
-|  [ ] | BG-2610-03 | ---     | Nguyễn Văn An     | Nháp        |  2. THÔNG TIN XUẤT HÓA ĐƠN:                               |
-|                                                           |     [x] Lấy từ khách hàng   Số HĐ: [ HĐ-00231 ] (readonly)|
-|                                                           |  3. DỊCH VỤ BỔ SUNG:                                      |
-|                                                           |     Lấy mẫu: [ Nhận tận nơi ]  Phí: [ 200.000 ] VAT: [ 8% ]|
-|                                                           |     Công bố: [ Có ]            Phí: [ 500.000 ] VAT: [ 5% ]|
-|                                                           |  4. THƯƠNG MẠI & THANH TOÁN: Chiết khấu: [ 10% ]          |
-|                                                           |  5. NỀN MẪU & CHỈ TIÊU: [+ Thêm mẫu]                      |
-|                                                           |     - Mẫu 1: Chỉ tiêu A (200k x 2) [x] ⚡ KN: +25%        |
-|                                                           |  6. TỔNG CHI PHÍ:                                         |
-|                                                           |     Tổng thanh toán: 800.500 đ  (Margin: 45%)             |
-|  Hiển thị 1 - 20 / 85  | Trang [ 1 ] 2 .. | [ Quản lý cột v] |  [ Lưu ]   [ Huỷ ]                                        |
-+-----------------------------------------------------------+-----------------------------------------------------------+
+```mermaid
+flowchart TD
+    subgraph UI_Layout ["🖥️ BỐ CỤC MÀN HÌNH BÁO GIÁ & YCTN (/yeu-cau-thu-nghiem)"]
+        direction TB
+        Header["1. Thanh điều hướng Tab Header: [BG & YCTN] (Active) · [TIẾP NHẬN YCTN]"]
+        Toolbar["2. Thanh công cụ Toolbar: [Nhân bản] · [KH chốt] · [Gửi YCTN] · [+ Thêm] · [Sửa] · [Xóa]"]
+        Filters["3. Chip trạng thái & Bộ lọc: (• Tất cả) (Nháp) (KH chốt) (YCTN CD) (YCTN BS) (YCTN DD) (YCTN TC) · Lọc ngày · Tìm kiếm"]
+        SplitView["4. Cấu trúc 2 Khung: Bảng danh sách Báo giá (Trái) ⮂ Form tạo mới 6 phần / Chi tiết 7 phần (Phải)"]
+        
+        Header --> Toolbar --> Filters --> SplitView
+    end
 ```
+
+| Phân khu (Section) | Vị trí hiển thị | Thành phần giao diện chính | Mục đích & Nghiệp vụ |
+| :--- | :--- | :--- | :--- |
+| **1. Header Tabs** | Trên cùng trang | Cụm tab: `BG & YCTN` (active), `TIẾP NHẬN YCTN`, nút `Xuất`, `In` | Điều hướng giữa quản lý báo giá và tiếp nhận mẫu LAB |
+| **2. Thanh công cụ (Toolbar)** | Dưới Header | Nút `"Nhân bản"`, `"KH chốt"`, `"Gửi YCTN"`, `"Thêm"`, `"Sửa"`, `"Xóa"` | Quản trị toàn diện vòng đời Báo giá từ Nháp đến khi gửi YCTN |
+| **3. Chip trạng thái & Bộ lọc** | Dưới Toolbar | 7 Chip trạng thái hồ sơ, bộ lọc khoảng ngày, ô tìm kiếm từ khóa | Phân loại và lọc nhanh hồ sơ theo giai đoạn thương mại |
+| **4. Bảng danh sách (Khung trái)**| Nửa bên trái | Cột: Mã BG, Mã YCTN, Khách hàng, Ngày nhận, Ngày trả, Trạng thái, Tổng tiền | Quan sát tổng thể danh sách hồ sơ báo giá đã lập |
+| **5. Form & Chi tiết (Khung phải)**| Nửa bên phải | Form 6 phần: Khách hàng/Hợp đồng, Hóa đơn, DV bổ sung, Thương mại, Nền mẫu/Chỉ tiêu, Tổng chi phí | Nhập liệu báo giá, tự động tính tiền, chiết khấu, VAT và Margin |
 
 ---
 

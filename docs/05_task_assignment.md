@@ -19,7 +19,7 @@
 ---
 
 ## 📑 MỤC LỤC ĐIỀU HƯỚNG NHANH
-1. [1. Định vị màn hình & Tổng quan tính năng (Overview & UI Wireframe)](#1-định-vị-màn-hình--tổng-quan-tính-năng-overview--ui-wireframe)
+1. [1. Định vị màn hình & Tổng quan tính năng (Overview & UI Layout)](#1-định-vị-màn-hình--tổng-quan-tính-năng-overview--ui-layout)
 2. [2. Sơ đồ phân tích luồng trực quan (Mermaid Flowcharts)](#2-sơ-đồ-phân-tích-luồng-trực-quan-mermaid-flowcharts)
 3. [3. Phân quyền & Điều kiện kích hoạt (Access & Permissions)](#3-phân-quyền--điều-kiện-kích-hoạt-access--permissions)
 4. [4. Đặc tả chi tiết các Use Cases chức năng (Functional Use Cases)](#4-đặc-tả-chi-tiết-các-use-cases-chức-năng-functional-use-cases)
@@ -41,27 +41,28 @@
   - **Nguyên tắc phân tách:** Tích chọn các chỉ tiêu khác tên hoặc khác KNV sẽ tự động tách thành các Hồ sơ Nhật ký độc lập tương ứng.
   - **Cảnh báo thay đổi KNV khi đang làm NK:** Bắt buộc hiển thị cảnh báo xác nhận trước khi cho phép giao lại việc khi KNV cũ đã bắt đầu nhập nhật ký thử nghiệm.
 
-### 1.2. Sơ đồ Wireframe Bố cục Giao diện (ASCII Text Wireframe)
+### 1.2. Bố cục Giao diện & Các Phân khu Chức năng (UI Layout Matrix)
 
-```text
-+-----------------------------------------------------------------------------------------------------------------------+
-|  [ GIAO VIỆC (Active) ]   [ HỒ SƠ TN ]   [ TRƯỞNG BP KTRA ]   [ RÀ SOÁT KQ ]                 [ Xuất ]   [ In ]        |
-+-----------------------------------------------------------------------------------------------------------------------+
-|  TOOLBAR: [ ▶ Thu gọn tất cả ]   [ ▼ Mở tất cả ]   [ Tạo hồ sơ NK ]                                                   |
-|  CHIPS: ( Chưa giao việc )  ( Đang làm )  ( Trễ hạn )  ( ⚡ Kiểm nhanh )  ( Thiếu HS )                                 |
-|  BỘ LỌC: [Lọc Ngày: Ngày nhận v] [Từ] [Đến]  |  Ô tìm kiếm: [ Nhập mã YCTN (TR...), mã mẫu (S...)...          [x] ]  |
-+-----------------------------------------------------------------------------------------------------------------------+
-|  THẺ YCTN 1: [▼] TR-2610-001 · Công ty TNHH ABC · Ngày nhận: 20/10/2026 · Hạn trả: 25/10/2026                      |
-|  +-----------------------------------------------------------------------------------------------------------------+  |
-|  | [x] | STT | MÃ MẪU | TÊN MẪU    | TÊN CHỈ TIÊU | PHƯƠNG PHÁP | TÊN KNV        | TRẠNG THÁI HS | KẾT QUẢ | ...      |  |
-|  | [x] | 1   | S-001  | Nước thải  | pH           | TCVN 6492   | [ TháiHD v ] [x]| Đang làm NK   | Chưa có | ...      |  |
-|  | [ ] | 2   | S-002  | Nước ngầm  | pH           | TCVN 6492   | [ TháiHD v ] [x]| Chưa có HS    | Chưa có | ...      |  |
-|  | [ ] | 3   | S-001  | Nước thải  | COD          | SMEWW 5220C | [— chưa gán —v]| Chưa có HS    | Chưa có | ...      |  |
-|  +-----------------------------------------------------------------------------------------------------------------+  |
-|                                                                                                                       |
-|  THẺ YCTN 2: [▶] TR-2610-002 · Thái test · Ngày nhận: 22/10/2026 · Hạn trả: 27/10/2026 (Đang thu gọn)               |
-+-----------------------------------------------------------------------------------------------------------------------+
+```mermaid
+flowchart TD
+    subgraph UI_Layout ["🖥️ BỐ CỤC MÀN HÌNH GIAO VIỆC (/giao-viec)"]
+        direction TB
+        Header["1. Thanh điều hướng Tab Header: [GIAO VIỆC] (Active) · [HỒ SƠ TN] · [TRƯỞNG BP KTRA] · [RÀ SOÁT KQ]"]
+        Toolbar["2. Thanh công cụ Toolbar: [▶ Thu gọn tất cả] · [▼ Mở tất cả] · [Tạo hồ sơ NK]"]
+        Filters["3. Chip trạng thái & Bộ lọc: (Chưa giao việc) (Đang làm) (Trễ hạn) (⚡ Kiểm nhanh) (Thiếu HS) · Lọc ngày · Ô tìm kiếm"]
+        CardOpen["4. Thẻ YCTN mở rộng: [▼] TR-2610-001 (Thông tin YCTN + Bảng 11 cột chỉ tiêu & Dropdown KNV)"]
+        CardClose["5. Thẻ YCTN thu gọn: [▶] TR-2610-002 (Chỉ hiển thị dòng tiêu đề gọn gàng)"]
+        
+        Header --> Toolbar --> Filters --> CardOpen --> CardClose
+    end
 ```
+
+| Phân khu (Section) | Vị trí hiển thị | Thành phần giao diện chính | Mục đích & Nghiệp vụ |
+| :--- | :--- | :--- | :--- |
+| **1. Header Tabs** | Trên cùng trang | Cụm tab: `GIAO VIỆC` (active), `HỒ SƠ TN`, `TRƯỞNG BP KTRA`, `RÀ SOÁT KQ`, nút `Xuất`, `In` | Điều hướng giữa các phân hệ quy trình thử nghiệm LAB |
+| **2. Thanh công cụ (Toolbar)** | Dưới Header | Nút `"▶ Thu gọn tất cả"`, `"▼ Mở tất cả"`, `"Tạo hồ sơ NK"` | Thao tác điều khiển trạng thái mở rộng thẻ và tạo hồ sơ hàng loạt |
+| **3. Chip trạng thái & Bộ lọc** | Dưới Toolbar | 5 Chip trạng thái, dropdown loại ngày, ô Từ ngày/Đến ngày, ô tìm kiếm từ khóa kèm nút `[×]` | Lọc nhanh các chỉ tiêu cần phân công theo tiến độ và thời hạn |
+| **4. Danh sách Thẻ YCTN (Accordion)** | Khu vực nội dung chính | Mỗi YCTN là 1 khối thẻ có thể đóng/mở độc lập; bên trong chứa bảng 11 cột chỉ tiêu | Xem danh sách mẫu, phân công KNV chuyên trách và theo dõi trạng thái hồ sơ |
 
 ---
 

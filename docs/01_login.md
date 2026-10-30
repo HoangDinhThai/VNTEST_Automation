@@ -19,7 +19,7 @@
 ---
 
 ## 📑 MỤC LỤC ĐIỀU HƯỚNG NHANH
-1. [1. Định vị màn hình & Tổng quan tính năng (Overview & UI Wireframe)](#1-định-vị-màn-hình--tổng-quan-tính-năng-overview--ui-wireframe)
+1. [1. Định vị màn hình & Tổng quan tính năng (Overview & UI Layout)](#1-định-vị-màn-hình--tổng-quan-tính-năng-overview--ui-layout)
 2. [2. Sơ đồ phân tích luồng trực quan (Mermaid Flowcharts)](#2-sơ-đồ-phân-tích-luồng-trực-quan-mermaid-flowcharts)
 3. [3. Phân quyền & Điều kiện kích hoạt (Access & Permissions)](#3-phân-quyền--điều-kiện-kích-hoạt-access--permissions)
 4. [4. Đặc tả chi tiết các Use Cases chức năng (Functional Use Cases)](#4-đặc-tả-chi-tiết-các-use-cases-chức-năng-functional-use-cases)
@@ -37,38 +37,32 @@
 * **Cấp phát phiên & Token:** Sau khi xác thực hợp lệ, cấp phát Access Token (JWT) và khởi tạo phiên làm việc bảo mật lưu trong Storage State / Session Cookie.
 * **Bảo vệ toàn vẹn tuyến đường (Auth Guard):** Ngăn chặn mọi hành vi cố tình nhập trực tiếp URL nội bộ khi chưa đăng nhập.
 
-### 1.2. Sơ đồ Wireframe Bố cục Giao diện (ASCII Text Wireframe)
+### 1.2. Bố cục Giao diện & Các Phân khu Chức năng (UI Layout Matrix)
 
-```text
-+-----------------------------------------------------------------------------------+
-|                                 VNTEST LIMS                                       |
-|             HỆ THỐNG QUẢN LÝ PHÒNG THÍ NGHIỆM VNTEST LIMS                         |
-+-----------------------------------------------------------------------------------+
-|                                                                                   |
-|                                   ĐĂNG NHẬP                                       |
-|                                                                                   |
-|   [ Banner thông báo lỗi hệ thống / Lỗi xác thực: "Email hoặc mật khẩu không đúng." ] |
-|                                                                                   |
-|   Email *                                                                         |
-|   +---------------------------------------------------------------------------+   |
-|   | admin@vntest.vn                                                           |   |
-|   +---------------------------------------------------------------------------+   |
-|   ( Câu cảnh báo lỗi đỏ: "Vui lòng nhập email." )                                 |
-|                                                                                   |
-|   Mật khẩu *                                                                      |
-|   +---------------------------------------------------------------------+-----+   |
-|   | •••••••••••••                                                       | 👁 |   |
-|   +---------------------------------------------------------------------+-----+   |
-|   ( Câu cảnh báo lỗi đỏ: "Vui lòng nhập mật khẩu." )                              |
-|                                                                                   |
-|   [x] Ghi nhớ đăng nhập                                      Quên mật khẩu?       |
-|                                                                                   |
-|   +---------------------------------------------------------------------------+   |
-|   |                              [ ĐĂNG NHẬP ]                                |   |
-|   +---------------------------------------------------------------------------+   |
-|                                                                                   |
-+-----------------------------------------------------------------------------------+
+```mermaid
+flowchart TD
+    subgraph UI_Layout ["🖥️ BỐ CỤC MÀN HÌNH ĐĂNG NHẬP (/dang-nhap)"]
+        direction TB
+        Brand["1. Khối Nhận diện Thương hiệu: Logo VNTEST & Tiêu đề 'HỆ THỐNG QUẢN LÝ PHÒNG THÍ NGHIỆM VNTEST LIMS'"]
+        Card["2. Thẻ Đăng nhập Trung tâm: Form khung viền bo góc, nền trắng nổi bật"]
+        Banner["3. Khu vực Thông báo lỗi hệ thống: Banner đỏ hiển thị khi thông tin xác thực không chính xác"]
+        Inputs["4. Trường Nhập liệu: Ô Email (kèm validate RFC) & Ô Mật khẩu (kèm icon con mắt toggle ẩn/hiện)"]
+        Options["5. Tùy chọn & Phím tắt: Checkbox 'Ghi nhớ đăng nhập' & Liên kết 'Quên mật khẩu?'"]
+        Actions["6. Thao tác Xác thực: Nút bấm 'ĐĂNG NHẬP' (kích hoạt bằng click hoặc phím Enter)"]
+        
+        Brand --> Card
+        Card --> Banner --> Inputs --> Options --> Actions
+    end
 ```
+
+| Phân khu (Section) | Vị trí hiển thị | Thành phần giao diện chính | Mục đích & Nghiệp vụ |
+| :--- | :--- | :--- | :--- |
+| **1. Header Thương hiệu** | Đầu trang | Logo VNTEST và Tiêu đề hệ thống VNTEST LIMS | Nhận diện thương hiệu và ứng dụng phòng thí nghiệm |
+| **2. Thẻ Đăng nhập (Card)**| Trung tâm màn hình | Khối form đăng nhập căn giữa với nền tương phản | Tập trung sự chú ý của người dùng vào luồng xác thực |
+| **3. Banner Cảnh báo lỗi** | Đầu form đăng nhập | Banner màu đỏ `.error-banner` | Hiển thị thông báo khi sai tài khoản/mật khẩu hoặc lỗi mạng |
+| **4. Ô nhập Email & Mật khẩu**| Thân thẻ đăng nhập | Ô nhập Email, ô Mật khẩu, icon mắt toggle ẩn/hiện mật khẩu | Tiếp nhận thông tin định danh và mật mã bảo mật của người dùng |
+| **5. Tùy chọn mở rộng** | Dưới ô Mật khẩu | Checkbox `"Ghi nhớ đăng nhập"`, liên kết `"Quên mật khẩu?"` | Lưu trạng thái phiên làm việc và hỗ trợ khôi phục mật khẩu |
+| **6. Nút Đăng nhập** | Chân form | Nút submit `"ĐĂNG NHẬP"` màu xanh chủ đạo | Kích hoạt kiểm tra form và gửi yêu cầu xác thực tới máy chủ |
 
 ---
 
