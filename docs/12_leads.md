@@ -35,7 +35,9 @@
 ### 1.1. Mục đích tính năng
 * **Quản trị Toàn diện Lead / Cơ hội Kinh doanh:** Tiếp nhận, sàng lọc và nuôi dưỡng các cơ hội tiềm năng từ các kênh marketing, hotline, website, mạng xã hội hoặc khách quen giới thiệu trước khi chuyển đổi thành Khách hàng chính thức.
 * **Bố cục 3 Phân khu Tương tác Cao (3-Pane Layout):** Thanh công cụ & Chiptabs lọc trạng thái ở trên cùng, Cột danh sách Thẻ Lead dạng Card ở bên trái và Khung xem chi tiết Lead + Dòng thời gian trao đổi (Timeline) ở bên phải.
-* **Theo dõi Dòng Thời Gian Trao đổi (Exchange History Timeline):** Cho phép nhân viên kinh doanh liên tục ghi nhận các ghi chú trao đổi (cuộc gọi, gặp mặt, email) theo thời gian thực để không bỏ sót tiến độ chăm sóc.
+* **Phân loại Mức độ Tiềm năng theo Nhiệt độ (Lead Temperature):** Hỗ trợ phân loại Lead theo 3 mức độ trực quan `Nóng` (Hot), `Ấm` (Warm), `Lạnh` (Cold) giúp nhân viên kinh doanh ưu tiên chăm sóc các cơ hội có khả năng chốt cao nhất.
+* **Thanh Tiến trình Chăm sóc Trực quan (Lifecycle Pipeline Stepper):** Hiển thị rõ ràng 4 giai đoạn chăm sóc (`Mới` ➔ `Chưa LH` ➔ `Đã LH` ➔ `Đã chốt`) kèm trạng thái hoàn thành từng nấc.
+* **Theo dõi Dòng Thời Gian Trao đổi (Exchange History Timeline):** Cho phép nhân viên kinh doanh liên tục ghi nhận các ghi chú trao đổi (cuộc gọi, gặp mặt, email) theo thời gian thực để không bỏ sót tiến độ chăm sóc; tự động cập nhật trạng thái Lead sang `Đã LH` khi có tương tác.
 * **Phân công & Điều phối Cơ hội (Lead Assignment):** Trưởng phòng hoặc người tiếp nhận có thể bàn giao và phân công Lead cho nhân sự kinh doanh phù hợp kèm cập nhật đồng bộ ngay trên thẻ và dòng thời gian.
 * **Chuyển đổi Sang Báo giá (Quote Conversion):** Hỗ trợ nút tác vụ tạo nhanh Báo giá thử nghiệm từ thông tin nhu cầu của Lead.
 
@@ -43,13 +45,13 @@
 
 ```mermaid
 flowchart TD
-    subgraph UI_Layout ["🖥️ BỐ CỤC MÀN HÌNH QUẢN LÝ LEAD / CƠ HỘI (/lead)"]
+    subgraph UI_Layout ["🖥️ BỐ CỤC MÀN HÌNH QUẢN LÝ LEAD / CƠ HỘI (/leads)"]
         direction TB
-        Toolbar["1. Thanh công cụ Toolbar: [+ Thêm mới Lead] · Ô tìm kiếm · Chips trạng thái: [Tất cả] [Mới] [Chưa LH] [Đã LH] [Đã chốt] [Thất bại] · Lọc mức ưu tiên"]
+        Toolbar["1. Thanh công cụ Toolbar: [+ Thêm mới Lead] · Dropdown [Mức độ: Tất cả / Nóng / Ấm / Lạnh] · Ô tìm kiếm tổng hợp 4 tiêu chí [Find: tên, công ty, mã lead, người phụ trách...] · Chips trạng thái: [Tất cả] [Mới] [Chưa LH] [Đã LH] [Đã chốt] [Thất bại]"]
         SplitPanes["2. Khung làm việc chia đôi (Split View):"]
-        CardsList["Cột trái: Danh sách Thẻ Lead dạng Card (Tên KH, SĐT, Công ty, Sale phụ trách, Nhãn dịch vụ, Phân trang)"]
-        RightDetail["Cột phải: Chi tiết Lead (Thông tin liên hệ, Nguồn, Nhu cầu cụ thể) + Lịch sử trao đổi Timeline (Ghi chú, Lịch sử đổi Sale)"]
-        Modals["3. Cửa sổ nghiệp vụ (Modal): Modal Thêm mới Lead · Modal Ghi nhận lịch sử trao đổi · Modal Phân công người phụ trách"]
+        CardsList["Cột trái: Danh sách Thẻ Lead dạng Card (Mã Lead, Tên KH, SĐT, Công ty, Sale phụ trách, Chip Mức độ, Nhãn dịch vụ, Phân trang)"]
+        RightDetail["Cột phải: (1) Header định danh · (2) Thanh tiến trình Stepper 4 nấc · (3) Lưới thuộc tính 2 cột & Dịch vụ · (4) Dòng thời gian Timeline kèm bộ đếm · (5) Banner Đã chốt"]
+        Modals["3. Cửa sổ nghiệp vụ (Modal): Modal Thêm mới Lead · Modal Chỉnh sửa Lead · Modal Ghi nhận lịch sử trao đổi · Modal Phân công người phụ trách"]
         
         Toolbar --> SplitPanes
         SplitPanes --> CardsList
@@ -61,11 +63,12 @@ flowchart TD
 
 | Phân khu (Section) | Vị trí hiển thị | Thành phần giao diện chính | Mục đích & Nghiệp vụ |
 | :--- | :--- | :--- | :--- |
-| **1. Thanh công cụ (Toolbar)** | Trên cùng màn hình | Nút `"+ Thêm mới Lead"`, ô tìm kiếm kèm nút `"Hủy"`, Chiptabs: `Tất cả`, `Mới`, `Chưa LH`, `Đã LH`, `Đã chốt`, `Thất bại`, nút lọc ưu tiên | Kích hoạt thêm Lead mới, lọc nhanh theo chu trình chăm sóc và tìm kiếm theo tên khách hàng |
-| **2. Cột Danh sách Thẻ Lead** | Nửa bên trái màn hình | Danh sách các Card Lead hiển thị: Tên khách hàng, SĐT, Công ty, Trạng thái, Dịch vụ quan tâm, Phân trang trước/sau | Hiển thị tổng quan các cơ hội, nhấp chọn thẻ để hiển thị chi tiết bên phải |
-| **3. Khung Chi tiết Lead** | Nửa bên phải (Phần trên) | Thông tin khách hàng, Tên công ty, SĐT, Email, Nguồn tiếp cận, Người phụ trách, Ngày nhận, Giá trị dự kiến, Nhu cầu cụ thể, Nút `"Sửa"`, `"Ghi nhận"`, `"Tạo báo giá"` | Tra cứu đầy đủ thông tin của Lead đang chọn và kích hoạt các tác vụ chuyển đổi |
-| **4. Dòng Thời Gian (Timeline)** | Nửa bên phải (Phần dưới) | Header Lịch sử trao đổi, danh sách các mốc thời gian: Ghi chú trao đổi, sự kiện bàn giao người phụ trách, thời gian và người thực hiện | Lưu vết minh bạch quá trình tương tác chăm sóc khách hàng từ lúc tạo Lead |
-| **5. Cửa sổ Modal nghiệp vụ** | Trung tâm màn hình | Modal Thêm mới Lead, Modal Ghi nhận trao đổi, Modal Phân công người phụ trách | Thực hiện các thao tác nhập liệu chính của phân hệ |
+| **1. Thanh công cụ (Toolbar)** | Trên cùng màn hình | Nút `"+ Thêm mới Lead"`, Dropdown `Mức độ: Tất cả / Nóng / Ấm / Lạnh`, ô tìm kiếm tổng hợp kèm nút `"Hủy"`, Chiptabs trạng thái: `Tất cả`, `Mới`, `Chưa LH`, `Đã LH`, `Đã chốt`, `Thất bại` | Kích hoạt thêm Lead mới, lọc theo nhiệt độ cơ hội, tìm kiếm theo 4 tiêu chí và lọc theo vòng đời chăm sóc |
+| **2. Cột Danh sách Thẻ Lead** | Nửa bên trái màn hình | Danh sách Card Lead (Mã lead, Tên KH, SĐT, Công ty, Sale phụ trách, Chip Mức độ, Dịch vụ quan tâm), Footer phân trang trước/sau | Hiển thị tổng quan các cơ hội, nhấp chọn thẻ để hiển thị chi tiết bên phải |
+| **3. Khung Chi tiết Lead (Header & Stepper)** | Nửa bên phải (Phần trên) | Mã Lead, Chip Mức độ (`Nóng`/`Ấm`/`Lạnh`), Chip Trạng thái, Tên khách hàng (in đậm), Tên công ty, SĐT liên hệ, Thanh tiến trình Stepper 4 nấc (`Mới` ➔ `Chưa LH` ➔ `Đã LH` ➔ `Đã chốt`), Nút `"Chỉnh sửa"`, `"Ghi nhận"`, `"Tạo báo giá"` | Tra cứu thông tin định danh của Lead, quan sát nấc tiến độ chăm sóc và kích hoạt các tác vụ nghiệp vụ |
+| **4. Lưới Thuộc tính & Dịch vụ** | Nửa bên phải (Phần giữa) | Lưới thuộc tính 2 cột: Nguồn Lead, Người phụ trách, Ngày tiếp nhận, Giá trị ước tính, Dịch vụ quan tâm (Tags/Chips bo tròn), Nhu cầu cụ thể | Hiển thị chi tiết các thông số kỹ thuật và thương mại của cơ hội |
+| **5. Dòng Thời Gian (Timeline)** | Nửa bên phải (Phần dưới) | Header tiêu đề kèm số lượng đếm `LỊCH SỬ TRAO ĐỔI (N)`, danh sách mốc sự kiện (Cuộc gọi, Gặp mặt, Giao việc phân công), Banner xanh `✔ Đã chốt thành Khách hàng.` ở chân trang | Lưu vết minh bạch và bất biến toàn bộ quá trình tương tác chăm sóc khách hàng từ lúc khởi tạo |
+| **6. Cửa sổ Modal nghiệp vụ** | Trung tâm màn hình | Modal Thêm mới Lead, Modal Chỉnh sửa Lead, Modal Ghi nhận lịch sử trao đổi, Modal Phân công người phụ trách | Thực hiện các thao tác nhập liệu, hiệu chỉnh dữ liệu và điều phối nhân sự |
 
 ---
 
@@ -75,38 +78,46 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start(["Màn hình Quản lý Lead (/lead)"]) --> ActionSelect{"Chọn hành động"}
+    Start(["Màn hình Quản lý Lead (/leads)"]) --> ActionSelect{"Chọn hành động"}
     
     ActionSelect -- "Tạo Lead mới" --> ClickAdd["Nhấn nút '+ Thêm mới Lead'"]
     ClickAdd --> ModalAdd["Mở Modal Thêm mới Lead"]
-    ModalAdd --> InputLead["Nhập Tên KH, SĐT, Công ty, Nguồn, chọn Dịch vụ quan tâm"]
+    ModalAdd --> InputLead["Nhập Tên KH, SĐT, Công ty, Email, MST, Nguồn, Giá trị, Dịch vụ, Nhu cầu"]
     InputLead --> SubmitLead["Nhấn nút 'Lưu'"]
-    SubmitLead --> SyncNewLead["Tạo Lead thành công ➔ Nạp Thẻ mới lên đầu danh sách & Mở chi tiết bên phải"]
+    SubmitLead --> SyncNewLead["Tạo Lead thành công ➔ Nạp Thẻ mới lên đầu danh sách & Tự động chọn mở chi tiết bên phải"]
     
     ActionSelect -- "Xem chi tiết" --> ClickCard["Click vào một Thẻ Lead bất kỳ trong danh sách"]
-    ClickCard --> ShowDetail["Cập nhật Khung chi tiết bên phải & Tải dòng thời gian Timeline"]
+    ClickCard --> ShowDetail["Cập nhật Khung chi tiết bên phải (Header, Stepper, Lưới thuộc tính, Timeline)"]
+    
+    ActionSelect -- "Chỉnh sửa Lead" --> ClickEdit["Nhấn nút 'Chỉnh sửa' tại khung chi tiết"]
+    ClickEdit --> ModalEdit["Mở Modal Chỉnh sửa kèm toàn bộ dữ liệu hiện tại"]
+    ModalEdit --> UpdateLead["Cập nhật thông tin và nhấn nút 'Lưu'"]
+    UpdateLead --> SyncEdit["Đồng bộ ngay dữ liệu mới trên Thẻ bên trái và Khung chi tiết bên phải"]
     
     ActionSelect -- "Ghi nhận trao đổi" --> ClickRecord["Nhấn nút 'Ghi nhận' tại khung chi tiết"]
-    ClickRecord --> ModalRecord["Mở modal 'Ghi nhận lịch sử trao đổi'"]
-    ModalRecord --> InputContent["Nhập nội dung cuộc gọi/trao đổi chi tiết"]
-    InputContent --> SaveRecord["Nhấn nút 'Lưu' ➔ Bổ sung một mốc mới vào Timeline ngay lập tức"]
+    ClickRecord --> ModalRecord["Mở modal 'Ghi nhận lịch sử trao đổi' (Chọn kênh, ngày giờ, nhập nội dung)"]
+    ModalRecord --> SaveRecord["Nhấn nút 'Lưu'"]
+    SaveRecord --> LogicRecord["Hệ thống xử lý: (1) Thêm mốc mới lên đầu Timeline · (2) Tăng bộ đếm (N) lên (N+1) · (3) Tự động chuyển trạng thái Lead sang 'Đã LH'"]
     
-    ActionSelect -- "Phân công Sale" --> ClickAssign["Nhấn nút 'Phân công' hoặc icon đổi Sale"]
+    ActionSelect -- "Phân công Sale" --> ClickAssign["Nhấn nút 'Phân công' trên thanh công cụ"]
     ClickAssign --> ModalAssign["Mở modal 'Phân công người phụ trách' (Tìm kiếm nhân viên)"]
-    ModalAssign --> SelectSale["Chọn nhân viên kinh doanh mới ➔ Nhấn 'Lưu'"]
-    SelectSale --> SyncAssign["Cập nhật tên Sale trên Thẻ Lead, Khung chi tiết và ghi sự kiện vào Timeline"]
+    ModalAssign --> SelectSale["Chọn nhân viên kinh doanh mới ➔ Nhấn 'Xác nhận'"]
+    SelectSale --> SyncAssign["Đồng bộ: Tên Sale mới trên Thẻ Lead, Khung chi tiết và tự động ghi mốc Giao việc vào Timeline"]
+    
+    ActionSelect -- "Tạo Báo giá" --> ClickQuote["Nhấn nút 'Tạo báo giá' tại khung chi tiết"]
+    ClickQuote --> NavQuote["Điều hướng sang màn hình Báo giá thử nghiệm kèm thông tin kế thừa từ Lead"]
 ```
 
-### 2.2. Sơ đồ Luồng Phân công Người Phụ trách (Lead Assignment)
+### 2.2. Sơ đồ Luồng Logic Chuyển đổi Trạng thái Lead (Lifecycle Pipeline)
 
 ```mermaid
 flowchart LR
-    subgraph LeadAssignFlow["👥 Phân Công Người Phụ Trách Lead"]
-        OpenModal["Mở Modal Phân công"] --> SearchEmp["Nhập tên nhân viên vào ô tìm kiếm"]
-        SearchEmp --> FilterList["Lọc danh sách nhân viên theo từ khóa"]
-        FilterList --> PickEmp["Chọn 1 nhân viên phù hợp"]
-        PickEmp --> ConfirmAssign["Nhấn nút 'Lưu'"]
-        ConfirmAssign --> UpdateAll["Đồng bộ: (1) Thẻ Lead trái · (2) Khung chi tiết phải · (3) Mốc sự kiện Timeline"]
+    subgraph LeadPipeline ["🔄 CHU TRÌNH TRẠNG THÁI LEAD / CƠ HỘI"]
+        direction LR
+        S1["1. Mới\n(Vừa tiếp nhận)"] -->|Ghi nhận cuộc gọi/gặp mặt| S2["2. Chưa LH / Đã LH\n(Đang tư vấn)"]
+        S2 -->|Chăm sóc & Gửi báo giá| S3["3. Đã chốt\n(Thành Khách hàng ✔)"]
+        S1 -.->|Khách không có nhu cầu| S4["4. Thất bại\n(Hủy tiếp cận ❌)"]
+        S2 -.->|Từ chối hợp tác| S4
     end
 ```
 
@@ -116,64 +127,112 @@ flowchart LR
 
 ### 3.1. Ma trận phân quyền truy cập (RBAC Matrix)
 
-| Vai trò người dùng (Role) | Xem Lead của mình | Xem toàn bộ Lead | Thêm mới Lead | Ghi nhận trao đổi | Phân công người phụ trách | Tạo báo giá |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Quản trị viên (Admin)** | Toàn quyền | Toàn quyền | Toàn quyền | Toàn quyền | Toàn quyền | Khả dụng |
-| **Trưởng phòng Kinh doanh**| Toàn quyền | Toàn quyền | Toàn quyền | Toàn quyền | Thẩm quyền chính | Khả dụng |
-| **Nhân viên Sale (Kinh doanh)**| Toàn quyền | Xem Lead chung | Được phép | Được phép | Đề xuất phân công | Khả dụng |
-| **Nhân viên Marketing / CSKH** | Xem Lead tạo ra | Xem toàn bộ | Được phép | Được phép | Xem tiến độ | Không có quyền |
+> [!NOTE]
+> Hệ thống hiện tại đang trong giai đoạn hoàn thiện cơ chế phân quyền chi tiết (RBAC). Các test cases kiểm thử phân quyền (`TC_LEAD_027` ➔ `TC_LEAD_031`) đang được tạm comment code trong file test suite và sẽ kích hoạt chạy tự động ngay khi tính năng được bàn giao.
+
+| Vai trò người dùng (Role) | Xem Lead của mình | Xem toàn bộ Lead | Thêm mới Lead | Chỉnh sửa Lead | Ghi nhận trao đổi | Phân công người phụ trách | Tạo báo giá |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Quản trị viên (Admin)** | Toàn quyền | Toàn quyền | Toàn quyền | Toàn quyền | Toàn quyền | Toàn quyền | Khả dụng |
+| **Trưởng phòng Kinh doanh**| Toàn quyền | Toàn quyền | Toàn quyền | Toàn quyền | Toàn quyền | Thẩm quyền chính | Khả dụng |
+| **Nhân viên Sale (Kinh doanh)**| Toàn quyền | Xem Lead chung | Được phép | Lead phụ trách | Được phép | Đề xuất phân công | Khả dụng |
+| **Nhân viên Marketing / CSKH** | Xem Lead tạo ra | Xem toàn bộ | Được phép | Lead tạo ra | Được phép | Xem tiến độ | Không có quyền |
 
 ### 3.2. Tiền điều kiện & Ràng buộc nghiệp vụ
-* **Trường bắt buộc khi tạo Lead:** Tên khách hàng, Số điện thoại và ít nhất một Dịch vụ quan tâm (Thử nghiệm thực phẩm, Môi trường, Dệt may, Hiệu chuẩn...).
+* **Trường bắt buộc khi tạo Lead:** Tên khách hàng, Số điện thoại và ít nhất một Dịch vụ quan tâm (Thử nghiệm thực phẩm, Môi trường, Dệt may, Hóa chất...).
+* **Ràng buộc định dạng dữ liệu:** Số điện thoại phải chuẩn 10 chữ số; Email phải đúng định dạng quốc tế chuẩn; Giá trị ước tính phải là ký tự số.
 * **Đồng bộ 3 Phân khu:** Khi một Lead mới được tạo hoặc cập nhật, thông tin bắt buộc phải phản ánh đồng thời ở cả 3 khối: Thẻ Lead bên trái, Khung chi tiết bên phải và Dòng thời gian Timeline.
 
 ---
 
 ## 4. ĐẶC TẢ CHI TIẾT CÁC USE CASES CHỨC NĂNG (FUNCTIONAL USE CASES)
 
-### UC-01: Bố cục Màn hình, Tìm kiếm & Lọc Thẻ Lead (Khối 01)
+### UC-01: Bố cục Màn hình, Tìm kiếm & Lọc Thẻ Lead (Khối 01 & 02)
 * **Tác nhân:** Người dùng mọi quyền hạn.
 * **Luồng sự kiện chính:**
-  1. Người dùng truy cập đường dẫn `/lead`.
+  1. Người dùng truy cập đường dẫn `/leads`.
   2. Hệ thống nạp màn hình với danh sách Thẻ Lead bên trái và khung chi tiết bên phải.
-  3. Người dùng nhập tên khách hàng vào ô tìm kiếm ➔ Danh sách thẻ lọc ra đúng các Lead có tên tương ứng.
+  3. **Tìm kiếm tổng hợp 4 tiêu chí:** Người dùng có thể tìm kiếm theo:
+     - Tên khách hàng (ví dụ: *"Trần Đăng Tuấn"*).
+     - Tên doanh nghiệp / công ty (ví dụ: *"Dược phẩm Đông Á"*).
+     - Mã Lead (ví dụ: *"LEAD-0103"*).
+     - Tên người phụ trách / Sale (ví dụ: *"Võ Thị Phương"*).
   4. Nhấn nút `"Hủy"` (icon [x]) trên ô tìm kiếm ➔ Xóa từ khóa và hoàn nguyên danh sách ban đầu.
-  5. Nhấp chọn các chip trạng thái (`Mới`, `Chưa liên hệ`, `Đã liên hệ`, `Đã chốt`, `Thất bại`) ➔ Thẻ Lead được lọc tương ứng theo trạng thái chăm sóc.
-  6. Nhấp chuột vào một thẻ Lead bất kỳ ➔ Khung bên phải cập nhật chi tiết và nạp timeline của Lead đó.
+  5. **Lọc theo Mức độ nhiệt:** Mở dropdown `"Mức độ: Tất cả"` và chọn một mức độ (`Nóng`, `Ấm`, `Lạnh`) ➔ Danh sách chỉ lọc ra các Lead có mức độ nhiệt tương ứng.
+  6. **Lọc theo Chiptabs trạng thái:** Nhấp chọn các chip trạng thái (`Tất cả`, `Mới`, `Chưa liên hệ`, `Đã liên hệ`, `Đã chốt`, `Thất bại`) ➔ Thẻ Lead được lọc tương ứng theo chu trình chăm sóc.
+  7. Nhấp chuột vào một thẻ Lead bất kỳ ➔ Khung bên phải cập nhật toàn bộ thông tin chi tiết, thanh Stepper và nạp timeline của Lead đó.
 
-### UC-02: Thêm mới Lead & Validation Ràng buộc (Khối 02)
+### UC-02: Thêm mới Lead & Validation Ràng buộc (Khối 04)
 * **Tác nhân:** Nhân viên Sale, Marketing, Admin.
 * **Luồng sự kiện chính:**
   1. Nhấn nút `"+ Thêm mới Lead"` trên thanh công cụ.
-  2. Modal tạo mới hiển thị các trường: Tên khách hàng, Số điện thoại, Tên công ty, Email, Nguồn tiếp cận, Dịch vụ quan tâm, Nhu cầu cụ thể.
+  2. Modal tạo mới hiển thị các trường: Tên khách hàng, Số điện thoại, Tên công ty, Email, Mã số thuế, Địa chỉ, Nguồn tiếp cận, Giá trị ước tính, Dịch vụ quan tâm, Nhu cầu cụ thể.
   3. **Kiểm tra Validation:**
      - Nếu để trống toàn bộ ➔ Báo lỗi các trường bắt buộc.
-     - Nếu để trống riêng Tên khách hàng ➔ Báo lỗi bắt buộc nhập tên.
-     - Nếu để trống riêng Số điện thoại ➔ Báo lỗi bắt buộc nhập SĐT.
-     - Nếu chưa chọn Dịch vụ quan tâm ➔ Báo lỗi yêu cầu chọn dịch vụ.
+     - Nếu để trống riêng Tên khách hàng ➔ Cảnh báo: *"Vui lòng nhập tên khách hàng."*.
+     - Nếu để trống riêng Số điện thoại ➔ Cảnh báo: *"Vui lòng nhập số điện thoại."*.
+     - Nếu chưa chọn Dịch vụ quan tâm ➔ Cảnh báo: *"Vui lòng chọn ít nhất một dịch vụ quan tâm."*.
+     - Nếu SĐT không đủ 10 số hoặc chứa chữ cái ➔ Cảnh báo lỗi định dạng SĐT.
+     - Nếu Email không đúng định dạng (thiếu `@`, thiếu domain) ➔ Cảnh báo lỗi định dạng email.
+     - Nếu Giá trị ước tính nhập chữ cái ➔ Chặn nhập ký tự chữ.
   4. **Lưu thành công:**
      - Người dùng nhập đầy đủ thông tin hợp lệ và nhấn nút `"Lưu"`.
-     - Modal đóng lại, hiển thị thông báo thành công.
+     - Modal đóng lại, hiển thị thông báo: *"Tạo khách hàng tiềm năng thành công."*.
      - Thẻ Lead mới xuất hiện ngay đầu danh sách và được tự động chọn để hiển thị chi tiết bên phải.
 
-### UC-03: Ghi nhận Lịch sử Trao đổi & Timeline (Khối 03)
+### UC-03: Chỉnh sửa Thông tin Lead (Khối 05)
+* **Tác nhân:** Nhân viên Sale phụ trách, Trưởng phòng Kinh doanh, Admin.
+* **Luồng sự kiện chính:**
+  1. Chọn một Lead từ danh sách thẻ bên trái.
+  2. Tại khung chi tiết bên phải, nhấn nút `"Chỉnh sửa"`.
+  3. Modal Chỉnh sửa mở ra kèm toàn bộ dữ liệu hiện tại của Lead được điền sẵn vào các trường.
+  4. Nếu xóa trắng Tên khách hàng và nhấn Lưu ➔ Hệ thống chặn lưu và cảnh báo lỗi bắt buộc.
+  5. Nếu nhấn nút `"Hủy"` ➔ Modal đóng lại và giữ nguyên thông tin ban đầu.
+  6. Thay đổi thông tin (SĐT, Email, Nhu cầu cụ thể, Dịch vụ quan tâm) và nhấn nút `"Lưu"`.
+  7. Hệ thống hiển thị thông báo: *"Cập nhật thành công."* và đóng modal.
+  8. Dữ liệu mới được cập nhật đồng bộ ngay lập tức trên Thẻ bên trái và Khung chi tiết bên phải.
+
+### UC-04: Ghi nhận Lịch sử Trao đổi & Luồng Logic Nút "Ghi nhận" (Khối 06)
 * **Tác nhân:** Nhân viên Sale đang chăm sóc Lead.
 * **Luồng sự kiện chính:**
   1. Chọn một Lead từ danh sách thẻ bên trái.
   2. Tại khung chi tiết bên phải, nhấn nút `"Ghi nhận"`.
-  3. Modal `"Ghi nhận lịch sử trao đổi"` mở ra.
-  4. Nếu để trống ô nội dung và nhấn Lưu ➔ Hệ thống chặn lưu và cảnh báo.
-  5. Nhập nội dung trao đổi chi tiết (ví dụ: *"Đã gọi điện tư vấn chỉ tiêu COD/BOD, khách hẹn gửi mẫu tuần tới"*) và nhấn nút `"Lưu"`.
-  6. Modal đóng lại, một mốc sự kiện mới được thêm ngay vào đầu dòng thời gian Timeline với tên người ghi nhận và thời gian thực.
+  3. Modal `"Ghi nhận lịch sử trao đổi"` mở ra:
+     - Kênh liên hệ chọn sẵn mặc định là `"Cuộc gọi"`.
+     - Trường Thời gian tự động hiển thị ngày giờ hiện tại của hệ thống.
+  4. Nếu để trống hoặc chỉ nhập khoảng trắng vào ô nội dung ➔ Hệ thống cảnh báo: *"Vui lòng nhập nội dung trao đổi."*.
+  5. Cho phép chọn kênh liên hệ (`Cuộc gọi`, `Gặp mặt trực tiếp`, `Email`, `Zalo`) và tùy chọn thời gian diễn ra trong quá khứ (hồi tố).
+  6. Nhập nội dung trao đổi chi tiết và nhấn nút `"Lưu"`.
+  7. **Hệ thống tự động thực thi chuỗi logic sau:**
+     - Hiển thị thông báo: *"Ghi nhận lịch sử liên hệ thành công."* và đóng modal.
+     - Mốc sự kiện mới được chèn ngay vào **vị trí đầu tiên (trên cùng)** của Dòng thời gian Timeline.
+     - Tiêu đề `LỊCH SỬ TRAO ĐỔI (N)` **tự động tăng bộ đếm lên (N+1)**.
+     - **Tự động chuyển trạng thái Lead:** Nếu Lead đang ở trạng thái `Mới` hoặc `Chưa LH`, hệ thống tự động đổi sang `Đã LH` (đồng bộ chip trên Header, nấc trên thanh Stepper và nhãn trên Thẻ Lead ngoài danh sách).
 
-### UC-04: Phân công Người Phụ trách (Khối 04)
+### UC-05: Phân công Người Phụ trách (Khối 07)
 * **Tác nhân:** Trưởng phòng Kinh doanh, Admin.
 * **Luồng sự kiện chính:**
-  1. Tại khung chi tiết Lead, nhấn nút phân công người phụ trách (hoặc mở modal phân công).
-  2. Modal mở ra hiển thị danh sách các nhân viên kinh doanh của Viện.
+  1. Tại khung chi tiết Lead, nhấn nút `"Phân công"` trên thanh công cụ.
+  2. Modal mở ra hiển thị danh sách các nhân viên kinh doanh kèm ô tìm kiếm.
   3. Người dùng nhập tên nhân viên vào ô tìm kiếm để lọc nhanh danh sách.
-  4. Chọn nhân viên mong muốn và nhấn nút `"Lưu"`.
-  5. Hệ thống cập nhật người phụ trách mới: Tên Sale mới hiển thị ngay trên Thẻ Lead bên trái, Khung chi tiết bên phải và một mốc sự kiện phân công tự động được ghi nhận vào Timeline.
+  4. Chọn nhân viên mong muốn và nhấn nút `"Xác nhận"`.
+  5. Hệ thống hiển thị thông báo: *"Cập nhật người phụ trách thành công."* và đóng modal.
+  6. **Đồng bộ đa khối:** Tên Sale mới hiển thị ngay trên Thẻ Lead bên trái, Khung chi tiết bên phải và một mốc sự kiện `"Giao việc - Chuyển người phụ trách từ [...] sang [...]"` tự động được ghi nhận vào Timeline.
+
+### UC-06: Chuyển đổi Lead sang Báo giá (Khối 08)
+* **Tác nhân:** Nhân viên Sale, Trưởng phòng Kinh doanh, Admin.
+* **Luồng sự kiện chính:**
+  1. Chọn một Lead có đầy đủ nhu cầu từ danh sách thẻ.
+  2. Nhấn nút `"Tạo báo giá"` tại khung chi tiết bên phải.
+  3. Hệ thống điều hướng sang phân hệ Báo giá thử nghiệm (`/test-requests`).
+  4. Form tạo báo giá tự động kế thừa sẵn các thông tin: Tên khách hàng, SĐT, Email, Dịch vụ quan tâm và Nhu cầu từ Lead.
+
+### UC-07: Phân trang Danh sách Thẻ Lead (Khối 09)
+* **Tác nhân:** Người dùng mọi quyền hạn.
+* **Luồng sự kiện chính:**
+  1. Người dùng quan sát dòng phân trang ở chân cột danh sách thẻ (`Hiện 1–10 / 50 lead`).
+  2. Nhấn nút `"Trang sau"` ➔ Danh sách tải trang tiếp theo (`Hiện 11–20 / 50 lead`).
+  3. Nhấn nút `"Trang trước"` ➔ Danh sách quay lại trang trước.
+  4. Tại trang 1, nút `"Trang trước"` ở trạng thái vô hiệu hóa; tại trang cuối, nút `"Trang sau"` ở trạng thái vô hiệu hóa.
 
 ---
 
@@ -181,15 +240,23 @@ flowchart LR
 
 | STT | Tên trường hiển thị | Vị trí form | Phân loại | Bắt buộc | Ràng buộc nghiệp vụ & Validation |
 | :---: | :--- | :--- | :---: | :---: | :--- |
-| 1 | **Tên khách hàng** | Modal Thêm Lead | Text Input | Có | Họ tên cá nhân đại diện hoặc người liên hệ chính |
-| 2 | **Số điện thoại** | Modal Thêm Lead | Text Input | Có | 10 chữ số, định dạng số điện thoại liên lạc |
-| 3 | **Tên công ty** | Modal Thêm Lead | Text Input | Không | Đơn vị công tác / Doanh nghiệp của khách hàng |
-| 4 | **Email** | Modal Thêm Lead | Text Input | Không | Định dạng email chuẩn |
-| 5 | **Nguồn tiếp cận** | Modal Thêm Lead | Select Dropdown | Không | Website, Hotline, Giới thiệu, Fanpage... |
-| 6 | **Dịch vụ quan tâm** | Modal Thêm Lead | Checkbox / Multi | Có | Phải chọn ít nhất 1 dịch vụ thử nghiệm quan tâm |
-| 7 | **Nhu cầu cụ thể** | Modal Thêm Lead | Textarea | Không | Mô tả yêu cầu kỹ thuật chi tiết của khách |
-| 8 | **Nội dung trao đổi** | Modal Ghi nhận | Textarea | Có | Bắt buộc nhập khi ghi nhận lịch sử tương tác |
-| 9 | **Người phụ trách** | Modal Phân công | Select / List | Có | Chọn 1 nhân sự kinh doanh đang hoạt động |
+| 1 | **Mã Lead** | Chi tiết / Thẻ Lead | Text Code | Tự sinh | Định dạng mã duy nhất: `LEAD-XXXX` |
+| 2 | **Mức độ Lead** | Toolbar / Thẻ / Detail | Select Dropdown | Có | 4 giá trị: `Tất cả`, `Nóng` (Hot), `Ấm` (Warm), `Lạnh` (Cold) |
+| 3 | **Trạng thái Lead** | Toolbar / Thẻ / Detail | Chiptab / Stepper | Có | 5 giai đoạn: `Mới`, `Chưa LH`, `Đã LH`, `Đã chốt`, `Thất bại` |
+| 4 | **Tên khách hàng** | Modal Thêm / Sửa | Text Input | Có | Họ tên cá nhân đại diện hoặc người liên hệ chính (tối đa 255 ký tự) |
+| 5 | **Số điện thoại** | Modal Thêm / Sửa | Text Input | Có | Đúng 10 chữ số, định dạng số điện thoại liên lạc Việt Nam |
+| 6 | **Tên công ty** | Modal Thêm / Sửa | Text Input | Không | Tên doanh nghiệp/tổ chức; hiển thị gạch ngang `—` khi để trống |
+| 7 | **Email** | Modal Thêm / Sửa | Text Input | Không | Định dạng email quốc tế chuẩn (`abc@domain.com`) |
+| 8 | **Mã số thuế** | Modal Thêm / Sửa | Text Input | Không | Mã số thuế doanh nghiệp (10 hoặc 13 chữ số) |
+| 9 | **Địa chỉ** | Modal Thêm / Sửa | Text Input | Không | Địa chỉ liên lạc / trụ sở của khách hàng |
+| 10 | **Nguồn tiếp cận** | Modal Thêm / Sửa | Select Dropdown | Không | Facebook, Website, Hotline, Giới thiệu, Fanpage... |
+| 11 | **Giá trị ước tính** | Modal Thêm / Sửa | Numeric Input | Không | Ký tự số, định dạng phân cách hàng nghìn (VNĐ) |
+| 12 | **Dịch vụ quan tâm** | Modal Thêm / Sửa | Checkbox / Multi | Có | Phải chọn ít nhất 1 dịch vụ thử nghiệm (Thực phẩm, Nước, Dệt may, Hóa chất...) |
+| 13 | **Nhu cầu cụ thể** | Modal Thêm / Sửa | Textarea | Không | Mô tả yêu cầu kỹ thuật chi tiết; hiển thị `—` khi để trống |
+| 14 | **Kênh trao đổi** | Modal Ghi nhận | Select Dropdown | Có | Cuộc gọi (mặc định), Gặp mặt trực tiếp, Email, Zalo |
+| 15 | **Thời gian trao đổi** | Modal Ghi nhận | Datetime Input | Có | Mặc định ngày giờ hiện tại; cho phép chọn thời gian trong quá khứ |
+| 16 | **Nội dung trao đổi** | Modal Ghi nhận | Textarea | Có | Bắt buộc nhập khi ghi nhận lịch sử tương tác (chặn nhập toàn khoảng trắng) |
+| 17 | **Người phụ trách** | Modal Phân công | Select Search | Có | Chọn 1 nhân sự kinh doanh đang hoạt động trong Viện |
 
 ---
 
@@ -198,32 +265,41 @@ flowchart LR
 | STT | Tên nút bấm / Icon | Vị trí hiển thị | Trạng thái mặc định | Điều kiện kích hoạt | Hành vi hệ thống khi thao tác |
 | :---: | :--- | :--- | :---: | :--- | :--- |
 | 1 | **Nút "+ Thêm mới Lead"** | Thanh công cụ Toolbar | Khả dụng | Nhấp chuột | Mở Modal Thêm mới Lead tiềm năng |
-| 2 | **Nút "Hủy" tìm kiếm** | Trong ô tìm kiếm | Ẩn khi rỗng | Có từ khóa | Xóa trắng ô tìm kiếm và nạp lại danh sách đầy đủ |
-| 3 | **Chiptabs Trạng thái** | Dưới thanh tìm kiếm | Khả dụng | Nhấp chuột | Lọc danh sách thẻ Lead theo trạng thái tương ứng |
-| 4 | **Thẻ Lead (Lead Card)** | Cột danh sách bên trái | Khả dụng | Nhấp chuột | Kích hoạt hiển thị chi tiết Lead và dòng thời gian bên phải |
-| 5 | **Nút "Ghi nhận"** | Khung chi tiết bên phải | Khả dụng | Nhấp chuột | Mở Modal Ghi nhận lịch sử trao đổi của Lead |
-| 6 | **Nút "Phân công"** | Khung chi tiết bên phải | Khả dụng | Nhấp chuột | Mở Modal Phân công người phụ trách mới |
-| 7 | **Nút "Tạo báo giá"** | Khung chi tiết bên phải | Khả dụng | Nhấp chuột | Điều hướng sang phân hệ Báo giá thử nghiệm kèm dữ liệu Lead |
-| 8 | **Nút "Lưu" (Modal Lead)** | Chân Modal Lead | Khả dụng | Nhấp chuột | Validate dữ liệu, lưu Lead mới và đóng modal |
-| 9 | **Nút "Hủy" (Các Modal)** | Chân các Modal | Khả dụng | Nhấp chuột | Đóng modal và hủy bỏ mọi thay đổi chưa lưu |
+| 2 | **Dropdown "Mức độ: Tất cả"** | Thanh công cụ Toolbar | Khả dụng | Nhấp chuột | Mở menu chọn mức độ nhiệt: Tất cả, Nóng, Ấm, Lạnh |
+| 3 | **Nút "Hủy" tìm kiếm** | Trong ô tìm kiếm | Ẩn khi rỗng | Có từ khóa | Xóa trắng ô tìm kiếm và nạp lại danh sách đầy đủ |
+| 4 | **Chiptabs Trạng thái** | Dưới thanh tìm kiếm | Khả dụng | Nhấp chuột | Lọc danh sách thẻ Lead theo trạng thái chu trình tương ứng |
+| 5 | **Thẻ Lead (Lead Card)** | Cột danh sách bên trái | Khả dụng | Nhấp chuột | Kích hoạt viền sáng, hiển thị chi tiết Lead và Timeline bên phải |
+| 6 | **Nút "Chỉnh sửa"** | Khung chi tiết bên phải | Khả dụng | Nhấp chuột | Mở Modal Chỉnh sửa thông tin của Lead đang chọn |
+| 7 | **Nút "Ghi nhận"** | Khung chi tiết bên phải | Khả dụng | Nhấp chuột | Mở Modal Ghi nhận lịch sử trao đổi của Lead |
+| 8 | **Nút "Phân công"** | Khung chi tiết / Toolbar | Khả dụng | Nhấp chuột | Mở Modal Phân công người phụ trách mới |
+| 9 | **Nút "Tạo báo giá"** | Khung chi tiết bên phải | Khả dụng | Nhấp chuột | Điều hướng sang phân hệ Báo giá kèm thông tin kế thừa từ Lead |
+| 10 | **Nút "Trang trước" [‹]** | Chân danh sách bên trái | Disable ở trang 1 | Có trang trước | Chuyển danh sách về trang trước đó |
+| 11 | **Nút "Trang sau" [›]** | Chân danh sách bên trái | Disable ở trang cuối | Có trang sau | Chuyển danh sách tới trang tiếp theo |
+| 12 | **Nút "Lưu" (Các Modal)** | Chân các Modal | Khả dụng | Nhấp chuột | Validate dữ liệu, lưu thông tin và đóng modal |
+| 13 | **Nút "Hủy" (Các Modal)** | Chân các Modal | Khả dụng | Nhấp chuột | Đóng modal và hủy bỏ mọi thay đổi chưa lưu |
 
 ---
 
 ## 7. QUY TẮC NGHIỆP VỤ & LUỒNG XỬ LÝ LỖI (BUSINESS RULES & ERROR HANDLING)
 
 ### 7.1. Quy tắc nghiệp vụ trọng yếu (Business Rules - BR)
-* **BR-01 (Ràng buộc Thông tin Tiếp cận Tối thiểu):** Bắt buộc phải có Tên, Số điện thoại và ít nhất một Dịch vụ quan tâm để đảm bảo cơ hội có tính khả thi chuyển đổi cao.
-* **BR-02 (Tính Toàn vẹn Dòng Thời Gian):** Mọi sự kiện tương tác (Ghi nhận trao đổi, Phân công người phụ trách, Thay đổi trạng thái) đều được tự động lưu vết vĩnh viễn vào Timeline với dấu ấn thời gian và danh tính người thao tác, không cho phép xóa sửa mốc lịch sử.
-* **BR-03 (Đồng bộ Đa Khối):** Khi thực hiện bất kỳ thay đổi nào (đổi người phụ trách, ghi nhận ghi chú), hệ thống phải cập nhật tức thì trên Thẻ Lead bên trái, Khung chi tiết và Timeline bên phải mà không cần reload trang.
+* **BR-01 (Ràng buộc Thông tin Tiếp cận Tối thiểu):** Bắt buộc phải có Tên khách hàng, Số điện thoại (10 số) và ít nhất một Dịch vụ quan tâm để đảm bảo cơ hội có tính khả thi chuyển đổi cao.
+* **BR-02 (Tính Toàn vẹn Dòng Thời Gian):** Mọi sự kiện tương tác (Ghi nhận trao đổi, Phân công người phụ trách, Thay đổi trạng thái) đều được tự động lưu vết vĩnh viễn vào Timeline với dấu ấn thời gian và danh tính người thao tác, ở chế độ chỉ đọc (không cho phép xóa sửa mốc lịch sử).
+* **BR-03 (Tự Động Chuyển Trạng Thái Khi Tương Tác):** Khi nhân viên thực hiện ghi nhận trao đổi thành công cho một Lead đang ở trạng thái `Mới` hoặc `Chưa LH`, hệ thống bắt buộc phải tự động chuyển trạng thái của Lead sang `Đã LH`.
+* **BR-04 (Tự Động Tăng Bộ Đếm Lịch Sử):** Tiêu đề Dòng thời gian `LỊCH SỬ TRAO ĐỔI (N)` phải tự động cập nhật số đếm tăng lên 1 đơn vị ngay khi có mốc sự kiện mới được thêm vào.
+* **BR-05 (Sắp Xếp Dòng Thời Gian Giảm Dần):** Mốc sự kiện mới nhất bắt buộc phải hiển thị ở vị trí trên cùng của Timeline, đẩy lùi các mốc cũ xuống dưới.
+* **BR-06 (Đồng bộ Đa Khối):** Khi thực hiện bất kỳ thay đổi nào (sửa thông tin, đổi người phụ trách, ghi nhận ghi chú), hệ thống phải cập nhật tức thì trên Thẻ Lead bên trái, Khung chi tiết và Timeline bên phải mà không cần reload trang.
 
 ### 7.2. Luồng xử lý ngoại lệ & Thông báo lỗi (Error Handling Matrix)
 
 | Mã lỗi / Tình huống ngoại lệ | Nguyên nhân kích hoạt | Phản hồi của hệ thống & Thông báo hiển thị | Hướng xử lý cho người dùng |
 | :--- | :--- | :--- | :--- |
-| **ERR_LEAD_MISSING_NAME** | Để trống Tên khách hàng khi tạo Lead | Cảnh báo: *"Vui lòng nhập tên khách hàng."* | Điền họ tên khách hàng đại diện |
-| **ERR_LEAD_MISSING_PHONE** | Để trống Số điện thoại khi tạo Lead | Cảnh báo: *"Vui lòng nhập số điện thoại."* | Điền số điện thoại liên lạc 10 số |
-| **ERR_LEAD_NO_SERVICE** | Chưa tích chọn Dịch vụ quan tâm | Cảnh báo: *"Vui lòng chọn ít nhất một dịch vụ quan tâm."* | Tích chọn lĩnh vực thử nghiệm phù hợp |
-| **ERR_NOTE_EMPTY** | Ghi nhận trao đổi nhưng để trống nội dung | Cảnh báo: *"Vui lòng nhập nội dung trao đổi."* | Nhập tóm tắt nội dung cuộc gọi/tư vấn |
+| **ERR_LEAD_MISSING_NAME** | Để trống Tên khách hàng khi tạo hoặc sửa | Cảnh báo: *"Vui lòng nhập tên khách hàng."* | Điền họ tên khách hàng đại diện |
+| **ERR_LEAD_MISSING_PHONE** | Để trống Số điện thoại khi tạo Lead | Cảnh báo: *"Vui lòng nhập số điện thoại."* | Điền số điện thoại liên lạc |
+| **ERR_LEAD_INVALID_PHONE** | Nhập SĐT không đủ 10 số hoặc chứa chữ cái | Cảnh báo: *"Số điện thoại không hợp lệ (yêu cầu 10 chữ số)."* | Kiểm tra và nhập đúng 10 chữ số liên lạc |
+| **ERR_LEAD_INVALID_EMAIL** | Nhập email sai định dạng (thiếu `@`, thiếu domain) | Cảnh báo: *"Email không hợp lệ."* | Nhập email đúng định dạng `abc@domain.com` |
+| **ERR_LEAD_NO_SERVICE** | Chưa tích chọn Dịch vụ quan tâm | Cảnh báo: *"Vui lòng chọn ít nhất một dịch vụ quan tâm."* | Tích chọn ít nhất một lĩnh vực thử nghiệm |
+| **ERR_NOTE_EMPTY** | Ghi nhận trao đổi nhưng để trống hoặc chỉ nhập dấu cách | Cảnh báo: *"Vui lòng nhập nội dung trao đổi."* | Nhập tóm tắt nội dung cuộc gọi/tư vấn |
 
 ---
 
